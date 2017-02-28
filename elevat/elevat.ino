@@ -1,3 +1,5 @@
+#include <Wire.h>
+
 // Generic constants
 const int LEVEL_NUMBER = 3; // Corresponds with levels 0, 1 and 2.
 
@@ -6,6 +8,9 @@ const int DOOR_SPEED = 2000; // Milliseconds for full open or close movement.
 const int DOOR_CLOSED_POSITION = 0; // Position value for a closed door.
 const int DOOR_OPEN_POSITION = 100; // Position value for an open door.
 const long DOOR_WAIT_TIME = 4000; // Milliseconds the doors will wait in the open position.
+
+// register interface constants
+const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
 
 // ------------------------------
 // Enum definitions
@@ -66,6 +71,13 @@ boolean encoder_overspeed = false;
 MotorDirection motor_direction;
 MotorSpeed motor_speed;
 
+// Global variable for register interface
+int nbr_of_received_bytes = 0;
+int received_values[I2C_BUFFER];
+int request_queue[100];
+int queue_start = 0;
+int queue_end = 0;
+
 // ------------------------------
 
 // Stub functions for outputs
@@ -105,6 +117,15 @@ void setup() {
   }
 
   // Setup input and output channels
+  
+  // Setup i2c bus
+  Wire.begin(4);                // join i2c bus with address #4
+  Wire.onReceive(receiveEvent); // register event
+  Wire.onRequest(requestEvent); // register event
+  
+  // Setup serial
+  Serial.begin(9600);           // start serial for output
+  Serial.println("setup end");
 
   // Init state machine and input variables
   setState(init_state);
@@ -430,6 +451,218 @@ void initialize() {
   moveCabinMotor(slow, down);
 
   // TODO: Stop wenn all level_position_states are known!
+}
+
+void intToCharArray(char *buf, int val) {
+  buf[0] = (val >> 24) & 0xff;
+  buf[1] = (val >> 16) & 0xff;
+  buf[2] = (val >> 8) & 0xff;
+  buf[3] = val & 0xff;
+}
+
+void longToCharArray(char *buf, long val) {
+  buf[0] = (val >> 24) & 0xff;
+  buf[1] = (val >> 16) & 0xff;
+  buf[2] = (val >> 8) & 0xff;
+  buf[3] = val & 0xff;
+}
+
+int arrayToInt(int *buf) {
+  int val = buf[0] << 24;
+  val |= buf[1] << 16;
+  val |= buf[2] << 8;
+  val |= buf[3];
+  return val;
+}
+
+// i2c receive event
+void receiveEvent(int howMany){
+  
+  nbr_of_received_bytes = 0;
+  while(Wire.available() > 0) {
+    if (nbr_of_received_bytes < I2C_BUFFER && state == testc_state) {
+      received_values[nbr_of_received_bytes++] = Wire.read();
+    } else {
+      Wire.read();
+    }
+  }
+  if (nbr_of_received_bytes == I2C_BUFFER) {
+    int address = received_values[0];
+    
+    if (address == 1) {
+      state = (OperationState) arrayToInt(&received_values[1]);
+
+    } else if (address == 2) {
+      last_state = (OperationState) arrayToInt(&received_values[1]);
+      
+    } else if (address == 3) {
+      state_time = (long) arrayToInt(&received_values[1]);
+
+    } else if (address == 20) {
+      int tmp = arrayToInt(&received_values[1]);
+      encoder_overspeed = 0;
+      if (tmp == 1) {
+        encoder_overspeed = 1;
+      }
+    }
+    
+  } else if (nbr_of_received_bytes == 1){
+    request_queue[queue_end++] = received_values[0];
+    if (queue_end == 100) {
+      queue_end = 0;
+    }
+  }  
+}
+
+// i2c request event
+void requestEvent() {
+
+  if (state != testc_state) {
+    queue_start = 0;
+    queue_end = 0;
+  }
+
+  if (queue_start < queue_end) {
+    int requested_address = request_queue[queue_start++];
+    if (queue_start == 100) {
+      queue_start = 0;
+    }
+    if (requested_address == 0) {
+      char val[4];
+      intToCharArray(val, 1);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 1) { // return state
+      char val[4];
+      intToCharArray(val, state);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 2) { // return last_state
+      char val[4];
+      intToCharArray(val, last_state);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 3) { // return state_time
+      char val[4];
+      longToCharArray(val, state_time);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 4) { // return state_cycle
+      char val[4];
+      longToCharArray(val, state_cycle);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 5) { // return level_position
+      char val[4];
+      intToCharArray(val, level_position);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 6) { // return level_target
+      char val[4];
+      intToCharArray(val, level_target);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 7) { // return level_position_state[0]
+      char val[4];
+      intToCharArray(val, level_position_state[0]);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 8) { // return level_position_state[1]
+      char val[4];
+      intToCharArray(val, level_position_state[1]);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 9) { // return level_position_state[2]
+      char val[4];
+      intToCharArray(val, level_position_state[2]);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 10) { // return last_blocked_level
+      char val[4];
+      intToCharArray(val, last_blocked_level);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 11) { // return button_state[0]
+      char val[4];
+      int bool_as_int = 0;
+      if (button_state[0]==1) {
+        bool_as_int = 1;
+      }
+      intToCharArray(val, bool_as_int);
+      Wire.write(val, 4);
+      Serial.println("send 0");
+      
+    } else if (requested_address == 12) { // return button_state[1]
+      char val[4];
+      int bool_as_int = 0;
+      if (button_state[1]==1) {
+        bool_as_int = 1;
+      }
+      intToCharArray(val, bool_as_int);
+      Wire.write(val, 4);
+      Serial.println("send 1");
+      
+    } else if (requested_address == 13) { // return button_state[2]
+      char val[4];
+      int bool_as_int = 0;
+      if (button_state[2]==1) {
+        bool_as_int = 1;
+      }
+      intToCharArray(val, bool_as_int);
+      Wire.write(val, 4);
+      Serial.println("send 2");
+      
+    } else if (requested_address == 14) { // return door_start_time
+      char val[4];
+      longToCharArray(val, door_start_time);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 15) { // return door_position
+      char val[4];
+      intToCharArray(val, door_position);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 16) { // return encoder_value
+      char val[4];
+      intToCharArray(val, encoder_value);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 17) { // return encoder_time
+      char val[4];
+      longToCharArray(val, encoder_time);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 18) { // return encoder_ticks
+      char val[4];
+      longToCharArray(val, encoder_ticks);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 19) { // return encoder_speed
+      char val[4];
+      intToCharArray(val, *((int*)&encoder_speed));
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 20) { // return encoder_overspeed
+      char val[4];
+       int bool_as_int = 0;
+      if (button_state[1]==1) {
+        bool_as_int = 1;
+      }
+      intToCharArray(val, encoder_overspeed);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 21) { // return motor_direction
+      char val[4];
+      intToCharArray(val, motor_direction);
+      Wire.write(val, 4);
+      
+    } else if (requested_address == 22) { // return motor_speed
+      char val[4];
+      intToCharArray(val, motor_speed);
+      Wire.write(val, 4);
+      
+    }    
+  }
 }
 
 
