@@ -460,13 +460,6 @@ void intToCharArray(char *buf, int val) {
   buf[3] = val & 0xff;
 }
 
-void longToCharArray(char *buf, long val) {
-  buf[0] = (val >> 24) & 0xff;
-  buf[1] = (val >> 16) & 0xff;
-  buf[2] = (val >> 8) & 0xff;
-  buf[3] = val & 0xff;
-}
-
 int arrayToInt(int *buf) {
   int val = buf[0] << 24;
   val |= buf[1] << 16;
@@ -496,16 +489,82 @@ void receiveEvent(int howMany){
       last_state = (OperationState) arrayToInt(&received_values[1]);
       
     } else if (address == 3) {
-      state_time = (long) arrayToInt(&received_values[1]);
-
-    } else if (address == 20) {
       int tmp = arrayToInt(&received_values[1]);
-      encoder_overspeed = 0;
-      if (tmp == 1) {
-        encoder_overspeed = 1;
+      state_time = *((long*)&tmp);
+      
+    } else if (address == 4) {
+      int tmp = arrayToInt(&received_values[1]);
+      state_cycle = *((long*)&tmp);
+      
+    } else if (address == 5) {
+      level_position = arrayToInt(&received_values[1]);
+      
+    } else if (address == 6) {
+      level_target = arrayToInt(&received_values[1]);
+      
+    } else if (address == 7) {
+      level_position_state[0] = (PositionState) arrayToInt(&received_values[1]);
+      
+    } else if (address == 8) {
+      level_position_state[1] = (PositionState) arrayToInt(&received_values[1]);
+      
+    } else if (address == 9) {
+      level_position_state[2] = (PositionState) arrayToInt(&received_values[1]);
+      
+    } else if (address == 10) {
+      last_blocked_level = arrayToInt(&received_values[1]);
+      
+    } else if (address == 11) {
+      int boolean_as_int = arrayToInt(&received_values[1]);
+      button_state[0] = false;
+      if (boolean_as_int == 1) {
+        button_state[0] = true;
       }
-    }
-    
+      
+    } else if (address == 12) {
+      int boolean_as_int = arrayToInt(&received_values[1]);
+      button_state[1] = false;
+      if (boolean_as_int == 1) {
+        button_state[1] = true;
+      }
+      
+    } else if (address == 13) {
+      int boolean_as_int = arrayToInt(&received_values[1]);
+      button_state[2] = false;
+      if (boolean_as_int == 1) {
+        button_state[2] = true;
+      }
+      
+    } else if (address == 14) {
+      int tmp = arrayToInt(&received_values[1]);
+      door_start_time = *((long*)&tmp);
+      
+    } else if (address == 15) {
+      door_position = arrayToInt(&received_values[1]);
+      
+    } else if (address == 16) {
+      encoder_value = arrayToInt(&received_values[1]);
+      
+    } else if (address == 17) {
+      int tmp = arrayToInt(&received_values[1]);
+      encoder_time = *((long*)&tmp);
+      
+    } else if (address == 18) {
+      int tmp = arrayToInt(&received_values[1]);
+      encoder_ticks = *((long*)&tmp);
+      
+    } else if (address == 19) {
+      int tmp = arrayToInt(&received_values[1]);
+      encoder_speed = *((float*)&tmp);
+      
+    } else if (address == 20) {
+      int boolean_as_int = arrayToInt(&received_values[1]);
+      encoder_overspeed = false;
+      if (boolean_as_int == 1) {
+        encoder_overspeed = true;
+      }
+      
+    }    
   } else if (nbr_of_received_bytes == 1){
     request_queue[queue_end++] = received_values[0];
     if (queue_end == 100) {
@@ -532,57 +591,57 @@ void requestEvent() {
       intToCharArray(val, 1);
       Wire.write(val, 4);
       
-    } else if (requested_address == 1) { // return state
+    } else if (requested_address == 1) { // OperationState state
       char val[4];
       intToCharArray(val, state);
       Wire.write(val, 4);
       
-    } else if (requested_address == 2) { // return last_state
+    } else if (requested_address == 2) { // OperationState last_state
       char val[4];
       intToCharArray(val, last_state);
       Wire.write(val, 4);
       
-    } else if (requested_address == 3) { // return state_time
+    } else if (requested_address == 3) { // long state_time
       char val[4];
-      longToCharArray(val, state_time);
+      intToCharArray(val, *((int*)&state_time));
       Wire.write(val, 4);
       
-    } else if (requested_address == 4) { // return state_cycle
+    } else if (requested_address == 4) { // long state_cycle
       char val[4];
-      longToCharArray(val, state_cycle);
+      intToCharArray(val, *((int*)&state_cycle));
       Wire.write(val, 4);
       
-    } else if (requested_address == 5) { // return level_position
+    } else if (requested_address == 5) { // int level_position
       char val[4];
       intToCharArray(val, level_position);
       Wire.write(val, 4);
       
-    } else if (requested_address == 6) { // return level_target
+    } else if (requested_address == 6) { // int level_target
       char val[4];
       intToCharArray(val, level_target);
       Wire.write(val, 4);
       
-    } else if (requested_address == 7) { // return level_position_state[0]
+    } else if (requested_address == 7) { // PositionState level_position_state[0]
       char val[4];
       intToCharArray(val, level_position_state[0]);
       Wire.write(val, 4);
       
-    } else if (requested_address == 8) { // return level_position_state[1]
+    } else if (requested_address == 8) { // PositionState level_position_state[1]
       char val[4];
       intToCharArray(val, level_position_state[1]);
       Wire.write(val, 4);
       
-    } else if (requested_address == 9) { // return level_position_state[2]
+    } else if (requested_address == 9) { // PositionState level_position_state[2]
       char val[4];
       intToCharArray(val, level_position_state[2]);
       Wire.write(val, 4);
       
-    } else if (requested_address == 10) { // return last_blocked_level
+    } else if (requested_address == 10) { // int last_blocked_level
       char val[4];
       intToCharArray(val, last_blocked_level);
       Wire.write(val, 4);
       
-    } else if (requested_address == 11) { // return button_state[0]
+    } else if (requested_address == 11) { // boolean button_state[0]
       char val[4];
       int bool_as_int = 0;
       if (button_state[0]==1) {
@@ -592,7 +651,7 @@ void requestEvent() {
       Wire.write(val, 4);
       Serial.println("send 0");
       
-    } else if (requested_address == 12) { // return button_state[1]
+    } else if (requested_address == 12) { // boolean button_state[1]
       char val[4];
       int bool_as_int = 0;
       if (button_state[1]==1) {
@@ -602,7 +661,7 @@ void requestEvent() {
       Wire.write(val, 4);
       Serial.println("send 1");
       
-    } else if (requested_address == 13) { // return button_state[2]
+    } else if (requested_address == 13) { // boolean button_state[2]
       char val[4];
       int bool_as_int = 0;
       if (button_state[2]==1) {
@@ -612,37 +671,37 @@ void requestEvent() {
       Wire.write(val, 4);
       Serial.println("send 2");
       
-    } else if (requested_address == 14) { // return door_start_time
+    } else if (requested_address == 14) { // long door_start_time
       char val[4];
-      longToCharArray(val, door_start_time);
+      intToCharArray(val, *((int*)&door_start_time));
       Wire.write(val, 4);
       
-    } else if (requested_address == 15) { // return door_position
+    } else if (requested_address == 15) { // int door_position
       char val[4];
       intToCharArray(val, door_position);
       Wire.write(val, 4);
       
-    } else if (requested_address == 16) { // return encoder_value
+    } else if (requested_address == 16) { // int encoder_value
       char val[4];
       intToCharArray(val, encoder_value);
       Wire.write(val, 4);
       
-    } else if (requested_address == 17) { // return encoder_time
+    } else if (requested_address == 17) { // long encoder_time
       char val[4];
-      longToCharArray(val, encoder_time);
+      intToCharArray(val, *((int*)&encoder_time));
       Wire.write(val, 4);
       
-    } else if (requested_address == 18) { // return encoder_ticks
+    } else if (requested_address == 18) { // long encoder_ticks
       char val[4];
-      longToCharArray(val, encoder_ticks);
+      intToCharArray(val, *((int*)&encoder_ticks));
       Wire.write(val, 4);
       
-    } else if (requested_address == 19) { // return encoder_speed
+    } else if (requested_address == 19) { // float encoder_speed
       char val[4];
       intToCharArray(val, *((int*)&encoder_speed));
       Wire.write(val, 4);
       
-    } else if (requested_address == 20) { // return encoder_overspeed
+    } else if (requested_address == 20) { // boolean encoder_overspeed
       char val[4];
        int bool_as_int = 0;
       if (button_state[1]==1) {
@@ -651,12 +710,12 @@ void requestEvent() {
       intToCharArray(val, encoder_overspeed);
       Wire.write(val, 4);
       
-    } else if (requested_address == 21) { // return motor_direction
+    } else if (requested_address == 21) { // MotorDirection motor_direction
       char val[4];
       intToCharArray(val, motor_direction);
       Wire.write(val, 4);
       
-    } else if (requested_address == 22) { // return motor_speed
+    } else if (requested_address == 22) { // MotorSpeed motor_speed
       char val[4];
       intToCharArray(val, motor_speed);
       Wire.write(val, 4);
