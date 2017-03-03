@@ -8,9 +8,39 @@ const int DOOR_SPEED = 2000; // Milliseconds for full open or close movement.
 const int DOOR_CLOSED_POSITION = 0; // Position value for a closed door.
 const int DOOR_OPEN_POSITION = 100; // Position value for an open door.
 const long DOOR_WAIT_TIME = 4000; // Milliseconds the doors will wait in the open position.
+const int DOOR_LEFT_OPEN = 50;    // TODO: Check this value!
+const int DOOR_LEFT_CLOSED = 200; // TODO: Check this value!
+const int DOOR_RIGHT_OPEN = 200;  // TODO: Check this value!
+const int DOOR_RIGHT_CLOSED = 50; // TODO: Check this value!
+
+// Motor related constants
+const int FAST_MOTOR_SPEED = 255;
+const int SLOW_MOTOR_SPEED = 127; // TODO: Check this value!
 
 // register interface constants
 const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
+
+// Pin constants
+const int PIN_O_MOTOR_ENABLE = 2;     // port pin 3
+const int PIN_O_MOTOR_UP = 3;         // port pin 4
+const int PIN_I_SAFETY_UP = 52;       // port pin 5
+const int PIN_O_MOTOR_DOWN = 4;       // port pin 6
+const int PIN_I_SAFETY_DOWN = 50;     // port pin 7
+const int PIN_I_TEMPERATURE = 11;     // port pin 10
+const int PIN_I_ENCODER_A = -1;       // port pin 11
+const int PIN_I_ENCODER_B = -1;       // port pin 12
+const int PIN_I_LEVEL_1 = -1;         // port pin 13
+const int PIN_I_LEVEL_2 = -1;         // port pin 14
+const int PIN_I_LEVEL_3 = -1;         // port pin 15
+const int PIN_O_DOOR_LEFT = 5;        // port pin 16
+const int PIN_O_DOOR_RIGHT = 6;       // port pin 17
+const int PIN_I_LEVEL_BUTTON_1 = -1;  // port pin 18
+const int PIN_O_LEVEL_LIGHT_1 = 7;    // port pin 19
+const int PIN_I_LEVEL_BUTTON_2 = -1;  // port pin 20
+const int PIN_O_LEVEL_LIGHT_2 = 8;    // port pin 21
+const int PIN_I_LEVEL_BUTTON_3 = -1;  // port pin 22
+const int PIN_O_LEVEL_LIGHT_3 = 9;    // port pin 23
+const int PIN_O_CABIN_LIGHT = 10;     // port pin 24
 
 // ------------------------------
 // Enum definitions
@@ -50,11 +80,17 @@ OperationState last_state = init_state; // Previous state of the state machine i
 long state_time = 0;
 long state_cycle = 0; // Holds the number of times the current state is iterated.
 
+// Position handling
 int level_position = -1;
 int level_target = -1;
 PositionState level_position_state[LEVEL_NUMBER];
 int last_blocked_level = -1;
 boolean button_state[LEVEL_NUMBER];
+boolean safetyUp = false; // State of the safety switch above the highest floor
+boolean safetyDown = false; // State of the safety switch below the lowest floor
+
+// Temperature variable
+float motorTemperature = -1;
 
 // Global variables for door movement
 long door_start_time = 0; // Moment of door movement begin.
@@ -80,31 +116,117 @@ int queue_end = 0;
 
 // ------------------------------
 
-// Stub functions for outputs
-void setDoorPositions(int position);
+// Write functions for outputs
+void setDoorPositions(int position) {
+  int left = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_LEFT_CLOSED, DOOR_LEFT_OPEN);
+  int right = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_RIGHT_CLOSED, DOOR_RIGHT_OPEN);
+  analogWrite(PIN_O_DOOR_LEFT, left);
+  analogWrite(PIN_O_DOOR_RIGHT, right);
+}
 
-void moveCabinMotor(MotorSpeed speed, MotorDirection direction);
-void stopCabinMotor();
+void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
+  motor_direction = direction;
+  motor_speed = speed;
+  
+  if (speed == stopped) {
+    stopCabinMotor();
+    return;
+  }
+  int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED;
+  digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
+  if (direction == up) {
+    analogWrite(PIN_O_MOTOR_UP, speedValue);
+    digitalWrite(PIN_O_MOTOR_DOWN, LOW);
+  } else {
+    analogWrite(PIN_O_MOTOR_DOWN, speedValue);
+    digitalWrite(PIN_O_MOTOR_UP, LOW);
+  }
+}
 
-void setCabinLight(LightMode light);
-void setButtonLight(int level, LightMode light);
+void stopCabinMotor() {
+  motor_direction = down;
+  motor_speed = stopped;
+  
+  digitalWrite(PIN_O_MOTOR_ENABLE, LOW);
+  digitalWrite(PIN_O_MOTOR_UP, LOW);
+  digitalWrite(PIN_O_MOTOR_DOWN, LOW);
+}
+
+void setCabinLight(LightMode light) {
+  if (light == on) {
+    digitalWrite(PIN_O_CABIN_LIGHT, HIGH);
+  } else {
+    digitalWrite(PIN_O_CABIN_LIGHT, LOW);
+  }
+}
+void setButtonLight(int level, LightMode light) {
+  int pin = PIN_O_LEVEL_LIGHT_1;
+  if (level == 2) {
+    pin = PIN_O_LEVEL_LIGHT_2;
+  } else if (level == 3) {
+    pin = PIN_O_LEVEL_LIGHT_3;
+  }
+
+  if (light == on) {
+    digitalWrite(pin, HIGH);
+  } else {
+    digitalWrite(pin, LOW);
+  }
+}
 
 // ------------------------------
 
-// Stub functions for inputs
+// Read functions for inputs
 boolean readLevelButton(int level) {
-  return false;
+  int pin = PIN_I_LEVEL_BUTTON_1;
+  if (level == 2) {
+    pin = PIN_I_LEVEL_BUTTON_2;
+  } else if (level == 3) {
+    pin = PIN_I_LEVEL_BUTTON_3;
+  }
+
+  return digitalRead(pin) == HIGH; // Maybe read as analog value
 }
 
 boolean readLevelSensor(int level) {
+  int pin = PIN_I_LEVEL_1;
+  if (level == 2) {
+    pin = PIN_I_LEVEL_2;
+  } else if (level == 3) {
+    pin = PIN_I_LEVEL_3;
+  }
+
   // TODO: Wert entprellen!
-  return false;
+  return digitalRead(pin) == HIGH; // Maybe read as analog value
 }
 
 // Possible values are 0, 1, 2 and 3. To interpret this value handle the two bits as separate values.
 int readEncoderValue() {
-  return 0;
+  int a = digitalRead(PIN_I_ENCODER_A);
+  int b = digitalRead(PIN_I_ENCODER_B);
+  return a + (b << 2);
 }
+
+float readTemperature() {
+  float temp              = 82;
+  ADCSRA = 0x00;
+  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+  ADMUX = 0x00;
+  ADMUX = (1 << REFS0);
+  ADMUX |= PIN_I_TEMPERATURE;
+
+  for (int i = 0; i <= 64; i++)
+  {
+    ADCSRA |= (1 << ADSC);
+    while (ADCSRA & (1 << ADSC));
+    temp += (ADCL + ADCH * 256);
+  }
+
+  temp /= 101;
+  temp -= 156;
+  return (temp);
+}
+
 // ------------------------------
 
 // Arduino Setup Function. Will be called once after system boot.
@@ -117,12 +239,21 @@ void setup() {
   }
 
   // Setup input and output channels
-  
+  pinMode(PIN_O_MOTOR_ENABLE, OUTPUT);
+  pinMode(PIN_O_MOTOR_UP, OUTPUT);
+  pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
+  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
+  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_3, OUTPUT);
+  pinMode(PIN_O_CABIN_LIGHT, OUTPUT);
+
   // Setup i2c bus
   Wire.begin(4);                // join i2c bus with address #4
   Wire.onReceive(receiveEvent); // register event
   Wire.onRequest(requestEvent); // register event
-  
+
   // Setup serial
   Serial.begin(9600);           // start serial for output
   Serial.println("setup end");
@@ -314,10 +445,15 @@ void setOutsideLevelStates(int level) {
   }
 }
 
+void transferTemperature() {
+  motorTemperature = readTemperature();
+}
+
 void transferInputs() {
   transferButtonInputs();
   transferEncoderInput();
   transferLevelSensors();
+  transferTemperature();
 }
 
 int findTargetLevel() {
@@ -353,6 +489,7 @@ void moveCabin() {
     setState(opendoors_state);
   }
 
+  // TODO: check safety switch values
   // TODO: check movement with encoder!
 }
 
@@ -450,6 +587,8 @@ void initialize() {
 
   moveCabinMotor(slow, down);
 
+  int safety = 0;
+  
   // TODO: Stop wenn all level_position_states are known!
 }
 
@@ -469,10 +608,10 @@ int arrayToInt(int *buf) {
 }
 
 // i2c receive event
-void receiveEvent(int howMany){
-  
+void receiveEvent(int howMany) {
+
   nbr_of_received_bytes = 0;
-  while(Wire.available() > 0) {
+  while (Wire.available() > 0) {
     if (nbr_of_received_bytes < I2C_BUFFER && state == testc_state) {
       received_values[nbr_of_received_bytes++] = Wire.read();
     } else {
@@ -481,96 +620,96 @@ void receiveEvent(int howMany){
   }
   if (nbr_of_received_bytes == I2C_BUFFER) {
     int address = received_values[0];
-    
+
     if (address == 1) {
       state = (OperationState) arrayToInt(&received_values[1]);
 
     } else if (address == 2) {
       last_state = (OperationState) arrayToInt(&received_values[1]);
-      
+
     } else if (address == 3) {
       int tmp = arrayToInt(&received_values[1]);
       state_time = *((long*)&tmp);
-      
+
     } else if (address == 4) {
       int tmp = arrayToInt(&received_values[1]);
       state_cycle = *((long*)&tmp);
-      
+
     } else if (address == 5) {
       level_position = arrayToInt(&received_values[1]);
-      
+
     } else if (address == 6) {
       level_target = arrayToInt(&received_values[1]);
-      
+
     } else if (address == 7) {
       level_position_state[0] = (PositionState) arrayToInt(&received_values[1]);
-      
+
     } else if (address == 8) {
       level_position_state[1] = (PositionState) arrayToInt(&received_values[1]);
-      
+
     } else if (address == 9) {
       level_position_state[2] = (PositionState) arrayToInt(&received_values[1]);
-      
+
     } else if (address == 10) {
       last_blocked_level = arrayToInt(&received_values[1]);
-      
+
     } else if (address == 11) {
       int boolean_as_int = arrayToInt(&received_values[1]);
       button_state[0] = false;
       if (boolean_as_int == 1) {
         button_state[0] = true;
       }
-      
+
     } else if (address == 12) {
       int boolean_as_int = arrayToInt(&received_values[1]);
       button_state[1] = false;
       if (boolean_as_int == 1) {
         button_state[1] = true;
       }
-      
+
     } else if (address == 13) {
       int boolean_as_int = arrayToInt(&received_values[1]);
       button_state[2] = false;
       if (boolean_as_int == 1) {
         button_state[2] = true;
       }
-      
+
     } else if (address == 14) {
       int tmp = arrayToInt(&received_values[1]);
       door_start_time = *((long*)&tmp);
-      
+
     } else if (address == 15) {
       door_position = arrayToInt(&received_values[1]);
-      
+
     } else if (address == 16) {
       encoder_value = arrayToInt(&received_values[1]);
-      
+
     } else if (address == 17) {
       int tmp = arrayToInt(&received_values[1]);
       encoder_time = *((long*)&tmp);
-      
+
     } else if (address == 18) {
       int tmp = arrayToInt(&received_values[1]);
       encoder_ticks = *((long*)&tmp);
-      
+
     } else if (address == 19) {
       int tmp = arrayToInt(&received_values[1]);
       encoder_speed = *((float*)&tmp);
-      
+
     } else if (address == 20) {
       int boolean_as_int = arrayToInt(&received_values[1]);
       encoder_overspeed = false;
       if (boolean_as_int == 1) {
         encoder_overspeed = true;
       }
-      
-    }    
-  } else if (nbr_of_received_bytes == 1){
+
+    }
+  } else if (nbr_of_received_bytes == 1) {
     request_queue[queue_end++] = received_values[0];
     if (queue_end == 100) {
       queue_end = 0;
     }
-  }  
+  }
 }
 
 // i2c request event
@@ -590,137 +729,137 @@ void requestEvent() {
       char val[4];
       intToCharArray(val, 1);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 1) { // OperationState state
       char val[4];
       intToCharArray(val, state);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 2) { // OperationState last_state
       char val[4];
       intToCharArray(val, last_state);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 3) { // long state_time
       char val[4];
       intToCharArray(val, *((int*)&state_time));
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 4) { // long state_cycle
       char val[4];
       intToCharArray(val, *((int*)&state_cycle));
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 5) { // int level_position
       char val[4];
       intToCharArray(val, level_position);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 6) { // int level_target
       char val[4];
       intToCharArray(val, level_target);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 7) { // PositionState level_position_state[0]
       char val[4];
       intToCharArray(val, level_position_state[0]);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 8) { // PositionState level_position_state[1]
       char val[4];
       intToCharArray(val, level_position_state[1]);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 9) { // PositionState level_position_state[2]
       char val[4];
       intToCharArray(val, level_position_state[2]);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 10) { // int last_blocked_level
       char val[4];
       intToCharArray(val, last_blocked_level);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 11) { // boolean button_state[0]
       char val[4];
       int bool_as_int = 0;
-      if (button_state[0]==1) {
+      if (button_state[0] == 1) {
         bool_as_int = 1;
       }
       intToCharArray(val, bool_as_int);
       Wire.write(val, 4);
       Serial.println("send 0");
-      
+
     } else if (requested_address == 12) { // boolean button_state[1]
       char val[4];
       int bool_as_int = 0;
-      if (button_state[1]==1) {
+      if (button_state[1] == 1) {
         bool_as_int = 1;
       }
       intToCharArray(val, bool_as_int);
       Wire.write(val, 4);
       Serial.println("send 1");
-      
+
     } else if (requested_address == 13) { // boolean button_state[2]
       char val[4];
       int bool_as_int = 0;
-      if (button_state[2]==1) {
+      if (button_state[2] == 1) {
         bool_as_int = 1;
       }
       intToCharArray(val, bool_as_int);
       Wire.write(val, 4);
       Serial.println("send 2");
-      
+
     } else if (requested_address == 14) { // long door_start_time
       char val[4];
       intToCharArray(val, *((int*)&door_start_time));
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 15) { // int door_position
       char val[4];
       intToCharArray(val, door_position);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 16) { // int encoder_value
       char val[4];
       intToCharArray(val, encoder_value);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 17) { // long encoder_time
       char val[4];
       intToCharArray(val, *((int*)&encoder_time));
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 18) { // long encoder_ticks
       char val[4];
       intToCharArray(val, *((int*)&encoder_ticks));
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 19) { // float encoder_speed
       char val[4];
       intToCharArray(val, *((int*)&encoder_speed));
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 20) { // boolean encoder_overspeed
       char val[4];
-       int bool_as_int = 0;
-      if (button_state[1]==1) {
+      int bool_as_int = 0;
+      if (button_state[1] == 1) {
         bool_as_int = 1;
       }
       intToCharArray(val, encoder_overspeed);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 21) { // MotorDirection motor_direction
       char val[4];
       intToCharArray(val, motor_direction);
       Wire.write(val, 4);
-      
+
     } else if (requested_address == 22) { // MotorSpeed motor_speed
       char val[4];
       intToCharArray(val, motor_speed);
       Wire.write(val, 4);
-      
-    }    
+
+    }
   }
 }
 
