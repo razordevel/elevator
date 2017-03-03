@@ -29,17 +29,17 @@ const int PIN_I_SAFETY_DOWN = 50;     // port pin 7
 const int PIN_I_TEMPERATURE = 11;     // port pin 10
 const int PIN_I_ENCODER_A = -1;       // port pin 11
 const int PIN_I_ENCODER_B = -1;       // port pin 12
-const int PIN_I_LEVEL_1 = -1;         // port pin 13
-const int PIN_I_LEVEL_2 = -1;         // port pin 14
-const int PIN_I_LEVEL_3 = -1;         // port pin 15
+const int PIN_I_LEVEL_0 = -1;         // port pin 13
+const int PIN_I_LEVEL_1 = -1;         // port pin 14
+const int PIN_I_LEVEL_2 = -1;         // port pin 15
 const int PIN_O_DOOR_LEFT = 5;        // port pin 16
 const int PIN_O_DOOR_RIGHT = 6;       // port pin 17
-const int PIN_I_LEVEL_BUTTON_1 = -1;  // port pin 18
-const int PIN_O_LEVEL_LIGHT_1 = 7;    // port pin 19
-const int PIN_I_LEVEL_BUTTON_2 = -1;  // port pin 20
-const int PIN_O_LEVEL_LIGHT_2 = 8;    // port pin 21
-const int PIN_I_LEVEL_BUTTON_3 = -1;  // port pin 22
-const int PIN_O_LEVEL_LIGHT_3 = 9;    // port pin 23
+const int PIN_I_LEVEL_BUTTON_0 = -1;  // port pin 18
+const int PIN_O_LEVEL_LIGHT_0 = 7;    // port pin 19
+const int PIN_I_LEVEL_BUTTON_1 = -1;  // port pin 20
+const int PIN_O_LEVEL_LIGHT_1 = 8;    // port pin 21
+const int PIN_I_LEVEL_BUTTON_2 = -1;  // port pin 22
+const int PIN_O_LEVEL_LIGHT_2 = 9;    // port pin 23
 const int PIN_O_CABIN_LIGHT = 10;     // port pin 24
 
 // ------------------------------
@@ -160,11 +160,11 @@ void setCabinLight(LightMode light) {
   }
 }
 void setButtonLight(int level, LightMode light) {
-  int pin = PIN_O_LEVEL_LIGHT_1;
-  if (level == 2) {
+  int pin = PIN_O_LEVEL_LIGHT_0;
+  if (level == 1) {
+    pin = PIN_O_LEVEL_LIGHT_1;
+  } else if (level == 2) {
     pin = PIN_O_LEVEL_LIGHT_2;
-  } else if (level == 3) {
-    pin = PIN_O_LEVEL_LIGHT_3;
   }
 
   if (light == on) {
@@ -178,22 +178,22 @@ void setButtonLight(int level, LightMode light) {
 
 // Read functions for inputs
 boolean readLevelButton(int level) {
-  int pin = PIN_I_LEVEL_BUTTON_1;
-  if (level == 2) {
+  int pin = PIN_I_LEVEL_BUTTON_0;
+  if (level == 1) {
+    pin = PIN_I_LEVEL_BUTTON_1;
+  } else if (level == 2) {
     pin = PIN_I_LEVEL_BUTTON_2;
-  } else if (level == 3) {
-    pin = PIN_I_LEVEL_BUTTON_3;
   }
 
   return digitalRead(pin) == HIGH; // Maybe read as analog value
 }
 
 boolean readLevelSensor(int level) {
-  int pin = PIN_I_LEVEL_1;
-  if (level == 2) {
+  int pin = PIN_I_LEVEL_0;
+  if (level == 1) {
+    pin = PIN_I_LEVEL_1;
+  } else if (level == 2) {
     pin = PIN_I_LEVEL_2;
-  } else if (level == 3) {
-    pin = PIN_I_LEVEL_3;
   }
 
   // TODO: Wert entprellen!
@@ -244,9 +244,9 @@ void setup() {
   pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
   pinMode(PIN_O_DOOR_LEFT, OUTPUT);
   pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_0, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
-  pinMode(PIN_O_LEVEL_LIGHT_3, OUTPUT);
   pinMode(PIN_O_CABIN_LIGHT, OUTPUT);
 
   // Setup i2c bus
