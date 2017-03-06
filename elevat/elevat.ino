@@ -23,24 +23,24 @@ const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
 // Pin constants
 const int PIN_O_MOTOR_ENABLE = 2;     // port pin 3
 const int PIN_O_MOTOR_UP = 3;         // port pin 4
-const int PIN_I_SAFETY_UP = 52;       // port pin 5
+const int PIN_I_SAFETY_UP = 50;       // port pin 5
 const int PIN_O_MOTOR_DOWN = 4;       // port pin 6
-const int PIN_I_SAFETY_DOWN = 50;     // port pin 7
-const int PIN_I_TEMPERATURE = 11;     // port pin 10
-const int PIN_I_ENCODER_A = -1;       // port pin 11
-const int PIN_I_ENCODER_B = -1;       // port pin 12
-const int PIN_I_LEVEL_0 = -1;         // port pin 13
-const int PIN_I_LEVEL_1 = -1;         // port pin 14
-const int PIN_I_LEVEL_2 = -1;         // port pin 15
+const int PIN_I_SAFETY_DOWN = 52;     // port pin 7
+const int PIN_I_TEMPERATURE = 1;      // port pin 10
+const int PIN_I_ENCODER_A = 38;       // port pin 11
+const int PIN_I_ENCODER_B = 40;       // port pin 12
+const int PIN_I_LEVEL_0 = 36;         // port pin 13
+const int PIN_I_LEVEL_1 = 28;         // port pin 14
+const int PIN_I_LEVEL_2 = 30;         // port pin 15
 const int PIN_O_DOOR_LEFT = 5;        // port pin 16
 const int PIN_O_DOOR_RIGHT = 6;       // port pin 17
-const int PIN_I_LEVEL_BUTTON_0 = -1;  // port pin 18
-const int PIN_O_LEVEL_LIGHT_0 = 7;    // port pin 19
-const int PIN_I_LEVEL_BUTTON_1 = -1;  // port pin 20
-const int PIN_O_LEVEL_LIGHT_1 = 8;    // port pin 21
-const int PIN_I_LEVEL_BUTTON_2 = -1;  // port pin 22
-const int PIN_O_LEVEL_LIGHT_2 = 9;    // port pin 23
-const int PIN_O_CABIN_LIGHT = 10;     // port pin 24
+const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
+const int PIN_O_LEVEL_LIGHT_0 = 46;   // port pin 19
+const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
+const int PIN_O_LEVEL_LIGHT_1 = 44;   // port pin 21
+const int PIN_I_LEVEL_BUTTON_2 = 26;  // port pin 22
+const int PIN_O_LEVEL_LIGHT_2 = 42;   // port pin 23
+const int PIN_O_CABIN_LIGHT = 48;     // port pin 24
 
 // ------------------------------
 // Enum definitions
