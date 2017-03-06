@@ -15,7 +15,8 @@ const int DOOR_RIGHT_CLOSED = 50; // TODO: Check this value!
 
 // Motor related constants
 const int FAST_MOTOR_SPEED = 255;
-const int SLOW_MOTOR_SPEED = 127; // TODO: Check this value!
+const int SLOW_MOTOR_SPEED_UP = 127; // TODO: Check this value!
+const int SLOW_MOTOR_SPEED_DOWN = 31; // TODO: Check this value!
 
 // register interface constants
 const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
@@ -132,12 +133,13 @@ void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
     stopCabinMotor();
     return;
   }
-  int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED;
   digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
   if (direction == up) {
+    int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED_UP;
     analogWrite(PIN_O_MOTOR_UP, speedValue);
     digitalWrite(PIN_O_MOTOR_DOWN, LOW);
   } else {
+    int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED_DOWN;
     analogWrite(PIN_O_MOTOR_DOWN, speedValue);
     digitalWrite(PIN_O_MOTOR_UP, LOW);
   }
@@ -208,23 +210,12 @@ int readEncoderValue() {
 }
 
 float readTemperature() {
-  float temp              = 82;
-  ADCSRA = 0x00;
-  ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
-  ADMUX = 0x00;
-  ADMUX = (1 << REFS0);
-  ADMUX |= PIN_I_TEMPERATURE;
-
-  for (int i = 0; i <= 64; i++)
-  {
-    ADCSRA |= (1 << ADSC);
-    while (ADCSRA & (1 << ADSC));
-    temp += (ADCL + ADCH * 256);
-  }
-
-  temp /= 101;
-  temp -= 156;
-  return (temp);
+   // resistor value of voltage divider in ohm
+   float resistor = 2700;
+   float sensorValue = analogRead(PIN_I_TEMPERATURE);  
+   float resistance = sensorValue / (1023-sensorValue) * resistor;
+   // resistor values from kty81-210 data sheet, written as polynomial trend line
+   return -1.332e-11 * pow(resistance,4) + 6.621e-8 * pow(resistance,3) - 0.0002 * pow(resistance,2) + 0.2947 * resistance - 230.55;  
 }
 
 // ------------------------------
