@@ -1,47 +1,60 @@
 #include <Wire.h>
+#include <Servo.h>
 
 // Generic constants
-const int LEVEL_NUMBER = 3; // Corresponds with levels 0, 1 and 2.
+#define LEVEL_NUMBER 3 // Corresponds with levels 0, 1 and 2.
 
 // Door related constants
-const int DOOR_SPEED = 2000; // Milliseconds for full open or close movement.
-const int DOOR_CLOSED_POSITION = 0; // Position value for a closed door.
-const int DOOR_OPEN_POSITION = 100; // Position value for an open door.
-const long DOOR_WAIT_TIME = 4000; // Milliseconds the doors will wait in the open position.
-const int DOOR_LEFT_OPEN = 50;    // TODO: Check this value!
-const int DOOR_LEFT_CLOSED = 200; // TODO: Check this value!
-const int DOOR_RIGHT_OPEN = 200;  // TODO: Check this value!
-const int DOOR_RIGHT_CLOSED = 50; // TODO: Check this value!
+static const int DOOR_SPEED = 2000; // Milliseconds for full open or close movement.
+static const int DOOR_CLOSED_POSITION = 0; // Position value for a closed door.
+static const int DOOR_OPEN_POSITION = 100; // Position value for an open door.
+static const long DOOR_WAIT_TIME = 4000; // Milliseconds the doors will wait in the open position.
+static const int DOOR_LEFT_OPEN = 10;    // TODO: Check this value!
+static const int DOOR_LEFT_CLOSED = 120; // TODO: Check this value!
+static const int DOOR_RIGHT_OPEN = 120;  // TODO: Check this value!
+static const int DOOR_RIGHT_CLOSED = 10; // TODO: Check this value!
 
 // Motor related constants
-const int FAST_MOTOR_SPEED = 255;
-const int SLOW_MOTOR_SPEED_UP = 127; // TODO: Check this value!
-const int SLOW_MOTOR_SPEED_DOWN = 31; // TODO: Check this value!
+static const int FAST_MOTOR_SPEED = 255;
+static const int SLOW_MOTOR_SPEED_UP = 127; // TODO: Check this value!
+static const int SLOW_MOTOR_SPEED_DOWN = 63; // TODO: Check this value!
+
+// Safety switch debounce buffer handling
+static const int SAFETY_TIMING = 2; // Milliseconds between measurementsU
+static const byte SAFETY_BUFFER_SIZE = 8;
+static const byte SAFETY_BUFFER_THRESHOLD = 6;
+
+// Encoder related constants
+static const int ENCODER_RESOLUTION = 24;
+static const long MILLI_PER_SECOND = 1000;
+static const long REFERENCE_TURN = 100;
+static const long STOP_TIME = 100;
 
 // register interface constants
-const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
+static const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
 
 // Pin constants
-const int PIN_O_MOTOR_ENABLE = 2;     // port pin 3
-const int PIN_O_MOTOR_UP = 3;         // port pin 4
-const int PIN_I_SAFETY_UP = 50;       // port pin 5
-const int PIN_O_MOTOR_DOWN = 4;       // port pin 6
-const int PIN_I_SAFETY_DOWN = 52;     // port pin 7
-const int PIN_I_TEMPERATURE = 1;      // port pin 10
-const int PIN_I_ENCODER_A = 38;       // port pin 11
-const int PIN_I_ENCODER_B = 40;       // port pin 12
-const int PIN_I_LEVEL_0 = 36;         // port pin 13
-const int PIN_I_LEVEL_1 = 28;         // port pin 14
-const int PIN_I_LEVEL_2 = 30;         // port pin 15
-const int PIN_O_DOOR_LEFT = 5;        // port pin 16
-const int PIN_O_DOOR_RIGHT = 6;       // port pin 17
-const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
-const int PIN_O_LEVEL_LIGHT_0 = 46;   // port pin 19
-const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
-const int PIN_O_LEVEL_LIGHT_1 = 44;   // port pin 21
-const int PIN_I_LEVEL_BUTTON_2 = 26;  // port pin 22
-const int PIN_O_LEVEL_LIGHT_2 = 42;   // port pin 23
-const int PIN_O_CABIN_LIGHT = 48;     // port pin 24
+static const int PIN_O_MOTOR_ENABLE = 2;     // port pin 3
+static const int PIN_O_MOTOR_UP = 3;         // port pin 4
+static const int PIN_I_SAFETY_UP = 50;       // port pin 5
+static const int PIN_O_MOTOR_DOWN = 4;       // port pin 6
+static const int PIN_I_SAFETY_DOWN = 52;     // port pin 7
+static const int PIN_I_TEMPERATURE = 1;      // port pin 10
+static const int PIN_I_ENCODER_A = 38;       // port pin 11
+static const int PIN_I_ENCODER_B = 40;       // port pin 12
+static const int PIN_I_LEVEL_0 = 36;         // port pin 13
+static const int PIN_I_LEVEL_1 = 28;         // port pin 14
+static const int PIN_I_LEVEL_2 = 30;         // port pin 15
+static const int PIN_O_DOOR_LEFT = 6;        // port pin 16
+static const int PIN_O_DOOR_RIGHT = 5;       // port pin 17
+static const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
+static const int PIN_O_LEVEL_LIGHT_0 = 11;//46;   // port pin 19
+static const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
+static const int PIN_O_LEVEL_LIGHT_1 = 10;//44;   // port pin 21
+static const int PIN_I_LEVEL_BUTTON_2 = 26;  // port pin 22
+static const int PIN_O_LEVEL_LIGHT_2 = 9;//42;   // port pin 23
+static const int PIN_O_CABIN_LIGHT = 12;//48;     // port pin 24
+static const int PIN_O_DEBUG_LED = 12;       // Debug LED
 
 // ------------------------------
 // Enum definitions
@@ -87,26 +100,39 @@ int level_target = -1;
 PositionState level_position_state[LEVEL_NUMBER];
 int last_blocked_level = -1;
 boolean button_state[LEVEL_NUMBER];
+
+// Safety switch handling
+boolean safetyUpBuffer[SAFETY_BUFFER_SIZE];
+boolean safetyDownBuffer[SAFETY_BUFFER_SIZE];
+int safetyBufferIndex = 0;
 boolean safetyUp = false; // State of the safety switch above the highest floor
 boolean safetyDown = false; // State of the safety switch below the lowest floor
+long safetyTime = 0;
 
 // Temperature variable
 float motorTemperature = -1;
 
 // Global variables for door movement
+Servo servo_left;
+Servo servo_right;
+boolean servo_attached = false;
 long door_start_time = 0; // Moment of door movement begin.
+long door_end_time = 0; // Moment of expected door movement end.
 int door_position = 0; // Holds door position as value between DOOR_CLOSED_POSITION and DOOR_OPEN_POSITION.
 
 // Global variables for encoder interpretion
 int encoder_value = 0;
 long encoder_time = 0;
 long encoder_ticks = 0;
-float encoder_speed = 0;
+long encoder_speed = 0;
 boolean encoder_overspeed = false;
 
 // Global variable for motor control
 MotorDirection motor_direction;
 MotorSpeed motor_speed;
+
+// Global variable for level init
+MotorDirection init_direction = down;
 
 // Global variable for register interface
 int nbr_of_received_bytes = 0;
@@ -119,20 +145,34 @@ int queue_end = 0;
 
 // Write functions for outputs
 void setDoorPositions(int position) {
+  if (!servo_attached) {
+    servo_left.attach(PIN_O_DOOR_LEFT);
+    servo_right.attach(PIN_O_DOOR_RIGHT);
+    servo_attached = true;
+  }
   int left = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_LEFT_CLOSED, DOOR_LEFT_OPEN);
   int right = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_RIGHT_CLOSED, DOOR_RIGHT_OPEN);
-  analogWrite(PIN_O_DOOR_LEFT, left);
-  analogWrite(PIN_O_DOOR_RIGHT, right);
+  servo_left.write(left);
+  servo_right.write(right);
+}
+
+void stopDoors() {
+  if (servo_attached) {
+    servo_left.detach();
+    servo_right.detach();
+    servo_attached = false;
+  }
 }
 
 void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
   motor_direction = direction;
   motor_speed = speed;
-  
+
   if (speed == stopped) {
     stopCabinMotor();
     return;
   }
+
   digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
   if (direction == up) {
     int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED_UP;
@@ -146,9 +186,19 @@ void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
 }
 
 void stopCabinMotor() {
+  digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
+  analogWrite(PIN_O_MOTOR_UP, SLOW_MOTOR_SPEED_UP);
+  digitalWrite(PIN_O_MOTOR_DOWN, LOW);
+
+  delay(10);
+
   motor_direction = down;
   motor_speed = stopped;
-  
+
+  // Reset safety switch values
+  safetyUp = false;
+  safetyDown = false;
+
   digitalWrite(PIN_O_MOTOR_ENABLE, LOW);
   digitalWrite(PIN_O_MOTOR_UP, LOW);
   digitalWrite(PIN_O_MOTOR_DOWN, LOW);
@@ -187,7 +237,7 @@ boolean readLevelButton(int level) {
     pin = PIN_I_LEVEL_BUTTON_2;
   }
 
-  return digitalRead(pin) == HIGH; // Maybe read as analog value
+  return digitalRead(pin) == HIGH;
 }
 
 boolean readLevelSensor(int level) {
@@ -198,24 +248,23 @@ boolean readLevelSensor(int level) {
     pin = PIN_I_LEVEL_2;
   }
 
-  // TODO: Wert entprellen!
-  return digitalRead(pin) == HIGH; // Maybe read as analog value
+  return digitalRead(pin) == LOW;
 }
 
 // Possible values are 0, 1, 2 and 3. To interpret this value handle the two bits as separate values.
 int readEncoderValue() {
-  int a = digitalRead(PIN_I_ENCODER_A);
-  int b = digitalRead(PIN_I_ENCODER_B);
-  return a + (b << 2);
+  int a = digitalRead(PIN_I_ENCODER_A) == HIGH ? 1 : 0;
+  int b = digitalRead(PIN_I_ENCODER_B) == HIGH ? 2 : 0;
+  return a + b;
 }
 
 float readTemperature() {
-   // resistor value of voltage divider in ohm
-   float resistor = 2700;
-   float sensorValue = analogRead(PIN_I_TEMPERATURE);  
-   float resistance = sensorValue / (1023-sensorValue) * resistor;
-   // resistor values from kty81-210 data sheet, written as polynomial trend line
-   return -1.332e-11 * pow(resistance,4) + 6.621e-8 * pow(resistance,3) - 0.0002 * pow(resistance,2) + 0.2947 * resistance - 230.55;  
+  // resistor value of voltage divider in ohm
+  float resistor = 2700;
+  float sensorValue = analogRead(PIN_I_TEMPERATURE);
+  float resistance = sensorValue / (1023 - sensorValue) * resistor;
+  // resistor values from kty81-210 data sheet, written as polynomial trend line
+  return -1.332e-11 * pow(resistance, 4) + 6.621e-8 * pow(resistance, 3) - 0.0002 * pow(resistance, 2) + 0.2947 * resistance - 230.55;
 }
 
 // ------------------------------
@@ -223,22 +272,37 @@ float readTemperature() {
 // Arduino Setup Function. Will be called once after system boot.
 void setup() {
   // put your setup code here, to run once:
+
+  // Setup input and output channels
+  pinMode(PIN_O_DEBUG_LED, OUTPUT);
+  pinMode(PIN_O_MOTOR_ENABLE, OUTPUT);
+  pinMode(PIN_O_MOTOR_UP, OUTPUT);
+  pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
+  servo_left.attach(PIN_O_DOOR_LEFT);
+  servo_right.attach(PIN_O_DOOR_RIGHT);
+  //  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
+  //  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_0, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
+  pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
+  pinMode(PIN_O_CABIN_LIGHT, OUTPUT);
+  pinMode(PIN_I_LEVEL_BUTTON_0, INPUT);
+  pinMode(PIN_I_LEVEL_BUTTON_1, INPUT);
+  pinMode(PIN_I_LEVEL_BUTTON_2, INPUT);
+  pinMode(PIN_I_SAFETY_UP, INPUT);
+  pinMode(PIN_I_SAFETY_DOWN, INPUT);
+  pinMode(PIN_I_TEMPERATURE, INPUT);
+  pinMode(PIN_I_ENCODER_A, INPUT);
+  pinMode(PIN_I_ENCODER_B, INPUT);
+  pinMode(PIN_I_LEVEL_0, INPUT);
+  pinMode(PIN_I_LEVEL_1, INPUT);
+  pinMode(PIN_I_LEVEL_2, INPUT);
+
   // Setup arrays
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     button_state[i] = false;
     level_position_state[i] = unknown;
   }
-
-  // Setup input and output channels
-  pinMode(PIN_O_MOTOR_ENABLE, OUTPUT);
-  pinMode(PIN_O_MOTOR_UP, OUTPUT);
-  pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
-  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
-  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
-  pinMode(PIN_O_LEVEL_LIGHT_0, OUTPUT);
-  pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
-  pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
-  pinMode(PIN_O_CABIN_LIGHT, OUTPUT);
 
   // Setup i2c bus
   Wire.begin(4);                // join i2c bus with address #4
@@ -249,8 +313,15 @@ void setup() {
   Serial.begin(9600);           // start serial for output
   Serial.println("setup end");
 
-  // Init state machine and input variables
+  // Init state machine
   setState(init_state);
+
+  // Set initial outputs
+  stopCabinMotor();
+  setCabinLight(off);
+  for (int i = 0; i < LEVEL_NUMBER; i++) {
+    setButtonLight(i, off);
+  }
 }
 
 // Arduino Loop Function. Will be called in an endless loop.
@@ -260,29 +331,33 @@ void loop() {
   transferInputs();
 
   switch (state) {
-init_state:
+    case init_state:
       initialize();
       break;
-sleep_state:
+    case sleep_state:
       sleep();
       break;
-move_state:
+    case move_state:
       moveCabin();
       break;
-opendoors_state:
+    case opendoors_state:
       openDoors();
       break;
-wait_state:
+    case wait_state:
       wait();
       break;
-closedoors_state:
+    case closedoors_state:
       closeDoors();
       break;
-maintenance_state:
+    case maintenance_state:
       maintenance();
       break;
-testc_state:
+    case testc_state:
       testc();
+      break;
+    default:
+      setState(maintenance_state);
+      break;
   }
 }
 
@@ -316,11 +391,15 @@ void transferEncoderInput() {
   int newValue = readEncoderValue();
   long newTime = millis();
 
+  if (encoder_time == newTime) {
+    return;
+  }
+
   if (newValue != encoder_value) {
-    boolean oldA = encoder_value & 1;
-    boolean oldB = encoder_value & 2;
-    boolean newA = newValue & 1;
-    boolean newB = newValue & 2;
+    boolean oldA = (encoder_value & 1) != 0;
+    boolean oldB = (encoder_value & 2) != 0;
+    boolean newA = (newValue & 1) != 0;
+    boolean newB = (newValue & 2) != 0;
 
     if (oldA != newA && oldB != newB) {
       encoder_overspeed = true;
@@ -334,8 +413,9 @@ void transferEncoderInput() {
     encoder_overspeed = false;
     encoder_ticks++;
 
-    float t = 24 * (newTime - encoder_time);
-    encoder_speed = 1000 / t;
+    long timeDelta = newTime - encoder_time;
+    long t = ENCODER_RESOLUTION * timeDelta;
+    encoder_speed = REFERENCE_TURN * MILLI_PER_SECOND / t;
 
     if ((encoder_value == 0 && newValue == 1) || (encoder_value == 1 && newValue == 3) ||
         (encoder_value == 3 && newValue == 2) || (encoder_value == 2 && newValue == 0)) {
@@ -344,6 +424,11 @@ void transferEncoderInput() {
 
     encoder_time = newTime;
     encoder_value = newValue;
+  } else if (newTime > encoder_time + STOP_TIME) {
+    encoder_overspeed = false;
+    encoder_value = newValue;
+    encoder_time = newTime;
+    encoder_speed = 0;
   }
 }
 
@@ -391,7 +476,7 @@ void transferLevelSensors() {
       setOutsideLevelStates(blockedLevel);
     } else {
       if (blockedLevel == -1) {
-        PositionState oldState = level_position_state[blockedLevel];
+        PositionState oldState = level_position_state[last_blocked_level];
         PositionState newState = unknown;
 
         if (oldState == unknown) {
@@ -431,7 +516,7 @@ void setOutsideLevelStates(int level) {
   for (int i = 0; i < level; i++) {
     level_position_state[i] = far_above;
   }
-  for (int i = level + i; i < LEVEL_NUMBER; i++) {
+  for (int i = level + 1; i < LEVEL_NUMBER; i++) {
     level_position_state[i] = far_below;
   }
 }
@@ -441,10 +526,44 @@ void transferTemperature() {
 }
 
 void transferInputs() {
+  transferSafetySwitch();
   transferButtonInputs();
   transferEncoderInput();
   transferLevelSensors();
   transferTemperature();
+}
+
+boolean readSafetySwitch(int pin) {
+  return digitalRead(pin) == HIGH;
+}
+
+void transferSafetySwitch() {
+  long now = millis();
+  if (now < safetyTime + SAFETY_TIMING) {
+    return;
+  }
+
+  safetyTime = now;
+  safetyBufferIndex++;
+  if (safetyBufferIndex >= SAFETY_BUFFER_SIZE) {
+    safetyBufferIndex = 0;
+  }
+  safetyUpBuffer[safetyBufferIndex] = readSafetySwitch(PIN_I_SAFETY_UP);
+  safetyDownBuffer[safetyBufferIndex] = readSafetySwitch(PIN_I_SAFETY_DOWN);
+
+  int upCount = 0;
+  int downCount = 0;
+  int i;
+  for (i = 0; i < SAFETY_BUFFER_SIZE; i++) {
+    if (safetyUpBuffer[i]) {
+      upCount++;
+    }
+    if (safetyDownBuffer[i]) {
+      downCount++;
+    }
+  }
+  safetyUp = upCount >= SAFETY_BUFFER_THRESHOLD;
+  safetyDown = downCount >= SAFETY_BUFFER_THRESHOLD;
 }
 
 int findTargetLevel() {
@@ -501,6 +620,7 @@ void closeDoors() {
   }
 
   if (door_position == DOOR_CLOSED_POSITION) {
+    stopDoors();
     setState(sleep_state);
   } else {
     moveDoors(DOOR_OPEN_POSITION, DOOR_CLOSED_POSITION);
@@ -515,9 +635,8 @@ void moveDoors(int fromPosition, int toPosition) {
     // Init door movement parameters
     long remainTime = map(door_position, fromPosition, toPosition, DOOR_SPEED, 0);
     door_start_time = map(fromPosition, door_position, toPosition, time, time + remainTime);
+    door_end_time = door_start_time + DOOR_SPEED;
   }
-
-  long door_end_time = door_start_time + DOOR_SPEED;
 
   door_position = map(time, door_start_time, door_end_time, fromPosition, toPosition);
 
@@ -559,28 +678,54 @@ void sleep() {
 }
 
 void initialize() {
-  closeDoors();
   setCabinLight(on);
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     setButtonLight(i, off);
     button_state[i] = false;
   }
 
+  setDoorPositions(DOOR_CLOSED_POSITION);
+
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     if (level_position_state[i] == reached) {
+      stopCabinMotor();
+      stopDoors();
       setState(sleep_state);
       return;
     }
   }
 
-  // Move Cabin slowly down until level is reached or motor stops because of safety switch.
-  // If Cabin at lowest point move slowly up until level is reached.
+  MotorSpeed speedValue = isAnyLevelClose() ? slow : fast;
 
-  moveCabinMotor(slow, down);
+  // Move Cabin down until level is reached or motor stops because of safety switch.
+  // If Cabin at lowest point move up again until level is reached.
 
-  int safety = 0;
-  
-  // TODO: Stop wenn all level_position_states are known!
+  if (init_direction == up) {
+    moveCabinMotor(speedValue, up);
+
+    if (safetyUp) {
+      stopCabinMotor();
+      init_direction = down;
+    }
+  } else if (init_direction == down) {
+    moveCabinMotor(speedValue, down);
+
+    if (safetyDown) {
+      stopCabinMotor();
+      init_direction = up;
+    }
+  } else {
+    init_direction = down;
+  }
+}
+
+boolean isAnyLevelClose() {
+  for (int i = 0; i < LEVEL_NUMBER; i++) {
+    if (level_position_state[i] == close_below || level_position_state[i] == close_above) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void intToCharArray(char *buf, int val) {
