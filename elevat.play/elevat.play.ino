@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <Servo.h>
 
 // Generic constants
 #define LEVEL_NUMBER 3 // Corresponds with levels 0, 1 and 2.
@@ -39,8 +40,8 @@ static const int PIN_I_ENCODER_B = 40;       // port pin 12
 static const int PIN_I_LEVEL_0 = 36;         // port pin 13
 static const int PIN_I_LEVEL_1 = 28;         // port pin 14
 static const int PIN_I_LEVEL_2 = 30;         // port pin 15
-static const int PIN_O_DOOR_LEFT = 5;        // port pin 16
-static const int PIN_O_DOOR_RIGHT = 6;       // port pin 17
+static const int PIN_O_DOOR_LEFT = 6;        // port pin 16
+static const int PIN_O_DOOR_RIGHT = 5;       // port pin 17
 static const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
 static const int PIN_O_LEVEL_LIGHT_0 = 11;//46;   // port pin 19
 static const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
@@ -100,6 +101,8 @@ boolean safetyDown = false; // State of the safety switch below the lowest floor
 float motorTemperature = -1;
 
 // Global variables for door movement
+Servo servo_left;
+Servo servo_right;
 long door_start_time = 0; // Moment of door movement begin.
 long door_end_time = 0; // Moment of expected door movement end.
 int door_position = 0; // Holds door position as value between DOOR_CLOSED_POSITION and DOOR_OPEN_POSITION.
@@ -131,8 +134,10 @@ int queue_end = 0;
 void setDoorPositions(int position) {
   int left = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_LEFT_CLOSED, DOOR_LEFT_OPEN);
   int right = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_RIGHT_CLOSED, DOOR_RIGHT_OPEN);
-  analogWrite(PIN_O_DOOR_LEFT, left);
-  analogWrite(PIN_O_DOOR_RIGHT, right);
+  servo_left.write(left);  
+  servo_right.write(right);
+  //analogWrite(PIN_O_DOOR_LEFT, left);
+  //analogWrite(PIN_O_DOOR_RIGHT, right);
 }
 
 void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
@@ -254,8 +259,10 @@ void setup() {
   pinMode(PIN_O_MOTOR_ENABLE, OUTPUT);
   pinMode(PIN_O_MOTOR_UP, OUTPUT);
   pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
-  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
-  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
+  servo_left.attach(PIN_O_DOOR_LEFT);
+  servo_right.attach(PIN_O_DOOR_RIGHT);
+//  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
+//  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_0, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
@@ -298,30 +305,42 @@ void setup() {
   }
 }
 
+int low = 10;
+int high = 120;
+int value = (high + low) / 2;
+
 // Arduino Loop Function. Will be called in an endless loop.
 void loop() {
+  servo_left.write(value);
+  servo_right.write(high + low - value);
+    
   digitalWrite(9, LOW);
   digitalWrite(10, LOW);
   digitalWrite(11, LOW);
   digitalWrite(12, LOW);
 
   if (readLevelButton(0)) {
-    digitalWrite(9, HIGH);
-    moveCabinMotor(fast, down);
+    digitalWrite(11, HIGH);
+    value = low;
+    //moveCabinMotor(fast, down);
+  } else if (readLevelButton(1)) {
+    digitalWrite(10, HIGH);
+    value = (high + low) / 2;
+    //stopCabinMotor();
   } else if (readLevelButton(2)) {
     digitalWrite(9, HIGH);
-    moveCabinMotor(fast, up);
-  } else if (readLevelButton(1)) {
-    digitalWrite(9, HIGH);
-    stopCabinMotor();
+    value = high;
+    //moveCabinMotor(fast, up);
   }
 
+  delay(10);
+ /*
   if (digitalRead(PIN_I_SAFETY_UP) == HIGH) {
     digitalWrite(11, HIGH);
   }
   if (digitalRead(PIN_I_SAFETY_DOWN) == HIGH) {
     digitalWrite(12, HIGH);
-  }
+  }*/
 }
 
 void testc() {
