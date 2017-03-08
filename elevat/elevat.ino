@@ -48,13 +48,14 @@ static const int PIN_I_LEVEL_2 = 30;         // port pin 15
 static const int PIN_O_DOOR_LEFT = 6;        // port pin 16
 static const int PIN_O_DOOR_RIGHT = 5;       // port pin 17
 static const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
-static const int PIN_O_LEVEL_LIGHT_0 = 11;//46;   // port pin 19
+static const int PIN_O_LEVEL_LIGHT_0 = 46;   // port pin 19
 static const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
-static const int PIN_O_LEVEL_LIGHT_1 = 10;//44;   // port pin 21
+static const int PIN_O_LEVEL_LIGHT_1 = 44;   // port pin 21
 static const int PIN_I_LEVEL_BUTTON_2 = 26;  // port pin 22
-static const int PIN_O_LEVEL_LIGHT_2 = 9;//42;   // port pin 23
-static const int PIN_O_CABIN_LIGHT = 12;//48;     // port pin 24
-static const int PIN_O_DEBUG_LED = 12;       // Debug LED
+static const int PIN_O_LEVEL_LIGHT_2 = 42;   // port pin 23
+static const int PIN_O_CABIN_LIGHT = 48;     // port pin 24
+static const int PIN_O_GREEN_STATUS = 12;    // Green Status LED
+static const int PIN_O_RED_STATUS = 13;      // Red Status LED
 
 // ------------------------------
 // Enum definitions
@@ -274,14 +275,13 @@ void setup() {
   // put your setup code here, to run once:
 
   // Setup input and output channels
-  pinMode(PIN_O_DEBUG_LED, OUTPUT);
+  pinMode(PIN_O_RED_STATUS, OUTPUT);
+  pinMode(PIN_O_GREEN_STATUS, OUTPUT);
   pinMode(PIN_O_MOTOR_ENABLE, OUTPUT);
   pinMode(PIN_O_MOTOR_UP, OUTPUT);
   pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
   servo_left.attach(PIN_O_DOOR_LEFT);
   servo_right.attach(PIN_O_DOOR_RIGHT);
-  //  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
-  //  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_0, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
@@ -324,11 +324,34 @@ void setup() {
   }
 }
 
+void setStatusLEDs() {
+  switch (state) {
+    case init_state:
+      digitalWrite(PIN_O_RED_STATUS, HIGH);
+      digitalWrite(PIN_O_GREEN_STATUS, HIGH);
+      break;
+    case maintenance_state:
+      digitalWrite(PIN_O_RED_STATUS, HIGH);
+      digitalWrite(PIN_O_GREEN_STATUS, LOW);
+      break;
+    case testc_state:
+      digitalWrite(PIN_O_RED_STATUS, HIGH);
+      digitalWrite(PIN_O_GREEN_STATUS, HIGH);
+      break;
+    default:
+      digitalWrite(PIN_O_RED_STATUS, LOW);
+      digitalWrite(PIN_O_GREEN_STATUS, HIGH);
+      break;
+  }
+}
+
 // Arduino Loop Function. Will be called in an endless loop.
 void loop() {
   state_cycle++;
 
   transferInputs();
+
+  setStatusLEDs();
 
   switch (state) {
     case init_state:
