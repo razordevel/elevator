@@ -1,0 +1,3 @@
+# Version:	$Rev: testing.ccdextension $
+
+tmp

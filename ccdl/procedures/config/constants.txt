@@ -1,0 +1,15 @@
+#******************************************************************************
+# Version:	$Rev: 1.0 $	
+#
+# DESCRIPTION
+# -----------
+# This file contains constant definitions used by the CCDL compiler
+#
+#******************************************************************************
+
+ON          1
+OFF         0
+TRUE        1
+FALSE       0
+START       1
+STOP        0

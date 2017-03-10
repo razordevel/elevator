@@ -1,0 +1,31 @@
+#******************************************************************************
+# Version:	$Rev: 1.0 $	
+#
+# DESCRIPTION
+# -----------
+# this file contains the parameter definitions, used by the CCDL compiler
+#
+#******************************************************************************
+
+CTRL_DI_FLOOR_LEVEL_0_SENSOR none
+CTRL_DI_FLOOR_LEVEL_1_SENSOR none
+CTRL_DI_FLOOR_LEVEL_2_SENSOR none
+
+CTRL_DO_FLOOR_LEVEL_0_BUTTON none
+CTRL_DO_FLOOR_LEVEL_1_BUTTON none
+CTRL_DO_FLOOR_LEVEL_2_BUTTON none
+
+CTRL_DI_FLOOR_LEVEL_0_LIGHT none
+CTRL_DI_FLOOR_LEVEL_1_LIGHT none
+CTRL_DI_FLOOR_LEVEL_2_LIGHT none
+
+CTRL_AI_CABIN_MOTOR_SPEED_ENABLED none
+CTRL_AI_CABIN_MOTOR_SPEED_UP rpm
+CTRL_AI_CABIN_MOTOR_SPEED_DOWN rpm
+
+CTRL_AI_MOTOR_TEMPERATURE degC
+
+DI_ROTARY_ENCODER_A none
+DI_ROTARY_ENCODER_B none
+DO_ROTARY_ENCODER_A none
+DO_ROTARY_ENCODER_B none

@@ -1,0 +1,12 @@
+// Justs tests whether the testdriver can be build
+// and no symbols from libraries are missing.
+CCD 
+
+Initial Conditions : {
+}
+
+Test Step 1 : {
+	tmp.measureSpeed()
+
+}
+END OF CCD

@@ -1,0 +1,15 @@
+#******************************************************************************
+# Version:	$Rev: 1.0 $	
+#
+# DESCRIPTION
+# -----------
+# this file contains all electrical pins which are used by the CCDL compiler
+#
+#******************************************************************************
+
+ROTARY_ENCODER_A	SRM1
+ROTARY_ENCODER_B	SRM1
+
+FLOOR_LEVEL_0_SENSOR+ SRM1
+FLOOR_LEVEL_1_SENSOR+ SRM1
+FLOOR_LEVEL_2_SENSOR+ SRM1

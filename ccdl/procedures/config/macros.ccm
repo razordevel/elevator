@@ -1,0 +1,17 @@
+#******************************************************************************
+#
+# DESCRIPTION
+# -----------
+# Defines macros that can be inserted into CCDL files
+#
+#******************************************************************************
+
+#macro test (A, B)
+				#ifdef A
+					set tmp.a to 42
+				#endif
+				
+				#ifdef B
+					set tmp.b to 42
+				#endif				
+#end macro

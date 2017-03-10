@@ -1,0 +1,48 @@
+ccd
+initial conditions:
+{
+	wait 1 [s]
+}
+
+test step 1:
+{
+	// Press button
+	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to ON
+	after 500 [ms]:
+		set CTRL_DO_FLOOR_LEVEL_0_BUTTON to OFF
+
+		// Check button lights
+	within 0 [ms] .. 100 [ms]:
+		expect CTRL_DI_FLOOR_LEVEL_0_LIGHT => ON
+
+	wait 2 [s]
+}
+
+test step 2:
+{
+	// Press button
+	set CTRL_DO_FLOOR_LEVEL_1_BUTTON to ON
+	after 500 [ms]:
+		set CTRL_DO_FLOOR_LEVEL_1_BUTTON to OFF
+
+		// Check button lights
+	within 0 [ms] .. 100 [ms]:
+		expect CTRL_DI_FLOOR_LEVEL_1_LIGHT => ON
+
+	wait 2 [s]
+}
+
+test step 3:
+{
+	// Press button
+	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON
+	after 500 [ms]:
+		set CTRL_DO_FLOOR_LEVEL_2_BUTTON to OFF
+
+		// Check button lights
+	within 0 [ms] .. 100 [ms]:
+		expect CTRL_DI_FLOOR_LEVEL_2_LIGHT => ON
+
+	wait 2 [s]
+}
+end of ccd

@@ -1,0 +1,10 @@
+#******************************************************************************
+# Version:	$Rev: testing.ccdextension $	
+#
+# DESCRIPTION
+# -----------
+# this file contains the parameter definitions, used by the CCDL compiler
+#
+#******************************************************************************
+
+tmp_a	FLOPS
