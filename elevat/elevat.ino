@@ -146,6 +146,8 @@ int received_values[I2C_BUFFER];
 int request_queue[100];
 int queue_start = 0;
 int queue_end = 0;
+int request_for_testc_state = 0;
+int leave_testc_state = 0;
 
 // ------------------------------
 
@@ -434,7 +436,10 @@ void loop() {
 }
 
 void testc() {
-  // TODO:
+  if (leave_testc_state == 1) {
+    leave_testc_state = 0;
+    setState(sleep_state);
+  }
 }
 
 void setState(OperationState newState) {
@@ -735,6 +740,12 @@ void maintenance() {
 }
 
 void sleep() {
+
+  if (request_for_testc_state == 1) {
+    request_for_testc_state = 0;
+    setState(testc_state);
+    return;
+  }
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     if (button_state[i] && level_position_state[i] == reached) {
       setState(opendoors_state);
@@ -829,8 +840,25 @@ void receiveEvent(int howMany) {
   }
   if (nbr_of_received_bytes == I2C_BUFFER) {
     int address = received_values[0];
-
-    if (address == 1) {
+    
+    if (state != testc_state && request_for_testc_state == 0) {
+      int request = arrayToInt(&received_values[1]);
+      if (address == 0 && request == 1) {
+        request_for_testc_state = 1;
+      }
+      return;
+      
+    } else if (state != testc_state) {
+      return;
+     
+    } else if (address == 0) {
+      int request = arrayToInt(&received_values[1]);
+      if (address == 0 && request == 2) {
+        leave_testc_state = 1;
+      }
+      return;
+    
+    } else if (address == 1) {
       state = (OperationState) arrayToInt(&received_values[1]);
 
     } else if (address == 2) {
@@ -927,6 +955,7 @@ void requestEvent() {
   if (state != testc_state) {
     queue_start = 0;
     queue_end = 0;
+    return;
   }
 
   if (queue_start < queue_end) {
