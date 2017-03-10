@@ -38,6 +38,7 @@ boolean encoder_overspeed = false;
 
 extern ccdl_te_parameterHandle _TDLP_DI_ROTARY_ENCODER_A;
 extern ccdl_te_parameterHandle _TDLP_DI_ROTARY_ENCODER_B;
+extern ccdl_te_parameterHandle _TDLP_CALC_ENCODER_SPEED;
 
 static int readEncoderValue();
 static void transferEncoderInput(tdl_measureSpeed_t * data);
@@ -50,6 +51,8 @@ double tdl_measureSpeed(ccdl_StatementReturnType * rp, const char * module, tdl_
 	data->counter += 3;
 	
 	rp->code = RC_FINISHED;
+	
+	ccdl_te_setParValue(_TDLP_CALC_ENCODER_SPEED, encoder_speed);
 
 	return encoder_speed;
 }

@@ -1,0 +1,19 @@
+ccd
+initial conditions:
+{
+	wait 1 [s]
+}
+
+test step 1:
+{
+// Apply temperature offset
+	after 500 [ms]:
+		set CTRL_DO_TEMPERATURE_OFFSET to 1
+
+		// Measure temperature change
+	within 0 [s] .. 1 [s]:
+		expect CTRL_AI_MOTOR_TEMPERATURE > 200
+
+	wait 2 [s]
+}
+end of ccd
