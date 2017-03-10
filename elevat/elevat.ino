@@ -5,57 +5,59 @@
 #define LEVEL_NUMBER 3 // Corresponds with levels 0, 1 and 2.
 
 // Door related constants
-static const int DOOR_SPEED = 2000; // Milliseconds for full open or close movement.
-static const int DOOR_CLOSED_POSITION = 0; // Position value for a closed door.
-static const int DOOR_OPEN_POSITION = 100; // Position value for an open door.
-static const long DOOR_WAIT_TIME = 4000; // Milliseconds the doors will wait in the open position.
-static const int DOOR_LEFT_OPEN = 10;    // TODO: Check this value!
-static const int DOOR_LEFT_CLOSED = 120; // TODO: Check this value!
-static const int DOOR_RIGHT_OPEN = 120;  // TODO: Check this value!
-static const int DOOR_RIGHT_CLOSED = 10; // TODO: Check this value!
+#define DOOR_SPEED 2000         // Milliseconds for full open or close movement.
+#define DOOR_CLOSED_POSITION 0  // Position value for a closed door.
+#define DOOR_OPEN_POSITION 100  // Position value for an open door.
+#define DOOR_WAIT_TIME 4000     // Milliseconds the doors will wait in the open position.
+#define DOOR_LEFT_OPEN 10
+#define DOOR_LEFT_CLOSED 120
+#define DOOR_RIGHT_OPEN 120
+#define DOOR_RIGHT_CLOSED 10
 
 // Motor related constants
-static const int FAST_MOTOR_SPEED = 255;
-static const int SLOW_MOTOR_SPEED_UP = 127; // TODO: Check this value!
-static const int SLOW_MOTOR_SPEED_DOWN = 63; // TODO: Check this value!
+#define FAST_MOTOR_SPEED 255        // Maximum motor speed. Value between 0 and 255
+#define SLOW_MOTOR_SPEED_UP 127     // Motor speed for slow movement up. Value between 0 and 255
+#define SLOW_MOTOR_SPEED_DOWN 63    // Motor speed for slow movement down. Value between 0 and 255
+#define ACCELERATE_MOTOR_TIME 2000  // Time in milliseconds to accelerate the motor to fast speed
+#define DECELERATE_MOTOR_TIME 1000  // Time in milliseconds to decelerate the motor from fast to slow speed
 
 // Safety switch debounce buffer handling
-static const int SAFETY_TIMING = 2; // Milliseconds between measurementsU
-static const byte SAFETY_BUFFER_SIZE = 8;
-static const byte SAFETY_BUFFER_THRESHOLD = 6;
+#define SAFETY_TIMING 2 // Milliseconds between measurements
+#define SAFETY_BUFFER_SIZE 8
+#define SAFETY_BUFFER_THRESHOLD 6
 
 // Encoder related constants
-static const int ENCODER_RESOLUTION = 24;
-static const long MILLI_PER_SECOND = 1000;
-static const long REFERENCE_TURN = 100;
-static const long STOP_TIME = 100;
+#define ENCODER_RESOLUTION 24
+#define MILLI_PER_SECOND 1000
+#define REFERENCE_TURN 100
+#define STOP_TIME 100
 
 // register interface constants
-static const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
+#define I2C_BUFFER 5 // 1 address byte and 4 byte to set
 
 // Pin constants
-static const int PIN_O_MOTOR_ENABLE = 2;     // port pin 3
-static const int PIN_O_MOTOR_UP = 3;         // port pin 4
-static const int PIN_I_SAFETY_UP = 50;       // port pin 5
-static const int PIN_O_MOTOR_DOWN = 4;       // port pin 6
-static const int PIN_I_SAFETY_DOWN = 52;     // port pin 7
-static const int PIN_I_TEMPERATURE = 1;      // port pin 10
-static const int PIN_I_ENCODER_A = 38;       // port pin 11
-static const int PIN_I_ENCODER_B = 40;       // port pin 12
-static const int PIN_I_LEVEL_0 = 36;         // port pin 13
-static const int PIN_I_LEVEL_1 = 28;         // port pin 14
-static const int PIN_I_LEVEL_2 = 30;         // port pin 15
-static const int PIN_O_DOOR_LEFT = 6;        // port pin 16
-static const int PIN_O_DOOR_RIGHT = 5;       // port pin 17
-static const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
-static const int PIN_O_LEVEL_LIGHT_0 = 46;   // port pin 19
-static const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
-static const int PIN_O_LEVEL_LIGHT_1 = 44;   // port pin 21
-static const int PIN_I_LEVEL_BUTTON_2 = 26;  // port pin 22
-static const int PIN_O_LEVEL_LIGHT_2 = 42;   // port pin 23
-static const int PIN_O_CABIN_LIGHT = 48;     // port pin 24
-static const int PIN_O_GREEN_STATUS = 12;    // Green Status LED
-static const int PIN_O_RED_STATUS = 13;      // Red Status LED
+#define PIN_O_MOTOR_ENABLE 2     // port pin 3
+#define PIN_O_MOTOR_UP 3         // port pin 4
+#define PIN_I_SAFETY_UP 50       // port pin 5
+#define PIN_O_MOTOR_DOWN 4       // port pin 6
+#define PIN_I_SAFETY_DOWN 52     // port pin 7
+#define PIN_I_TEMPERATURE 1      // port pin 10
+#define PIN_I_ENCODER_A 38       // port pin 11
+#define PIN_I_ENCODER_B 40       // port pin 12
+#define PIN_I_LEVEL_0 36         // port pin 13
+#define PIN_I_LEVEL_1 28         // port pin 14
+#define PIN_I_LEVEL_2 30         // port pin 15
+#define PIN_O_DOOR_LEFT 6        // port pin 16
+#define PIN_O_DOOR_RIGHT 5       // port pin 17
+#define PIN_I_LEVEL_BUTTON_0 34  // port pin 18
+#define PIN_O_LEVEL_LIGHT_0 46   // port pin 19
+#define PIN_I_LEVEL_BUTTON_1 32  // port pin 20
+#define PIN_O_LEVEL_LIGHT_1 44   // port pin 21
+#define PIN_I_LEVEL_BUTTON_2 26  // port pin 22
+#define PIN_O_LEVEL_LIGHT_2 42   // port pin 23
+#define PIN_O_CABIN_LIGHT 48     // port pin 24
+#define PIN_O_GREEN_STATUS 12    // Green Status LED
+#define PIN_O_RED_STATUS 13      // Red Status LED
 
 // ------------------------------
 // Enum definitions
@@ -129,8 +131,11 @@ long encoder_speed = 0;
 boolean encoder_overspeed = false;
 
 // Global variable for motor control
-MotorDirection motor_direction;
-MotorSpeed motor_speed;
+MotorDirection motor_direction;  // Current direction of the motor rotation
+MotorSpeed motor_speed;          // Current speed of the motor
+long motor_change_time;          // Time of the last motor speed change
+long motor_final_time;           // Calculated time of the final motor speed
+int motor_change_value;          // Value of the motor speed at the last change time
 
 // Global variable for level init
 MotorDirection init_direction = down;
@@ -141,8 +146,6 @@ int received_values[I2C_BUFFER];
 int request_queue[100];
 int queue_start = 0;
 int queue_end = 0;
-int request_for_testc_state = 0;
-int leave_testc_state = 0;
 
 // ------------------------------
 
@@ -168,32 +171,65 @@ void stopDoors() {
 }
 
 void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
-  motor_direction = direction;
-  motor_speed = speed;
+  if (motor_speed != speed) {
+    motor_change_time = millis();
+    motor_final_time = motor_change_time;
+    switch (motor_speed) {
+      case stopped:
+        motor_change_value = 0;
+        break;
+      case fast:
+        motor_change_value = FAST_MOTOR_SPEED;
+        break;
+      case slow:
+        motor_change_value = motor_direction == up ? SLOW_MOTOR_SPEED_UP : SLOW_MOTOR_SPEED_DOWN;
+        break;
+    }
+    switch (speed) {
+      case fast:
+        motor_final_time += ACCELERATE_MOTOR_TIME;
+        break;
+      case slow:
+        motor_final_time += motor_speed == fast ? DECELERATE_MOTOR_TIME : ACCELERATE_MOTOR_TIME;
+        break;
+    }
+  }
 
   if (speed == stopped) {
     stopCabinMotor();
     return;
   }
 
+  motor_direction = direction;
+  motor_speed = speed;
+
+  long time = millis();
+
   digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
   if (direction == up) {
     int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED_UP;
+    if (time <= motor_final_time) {
+      speedValue = map(time, motor_change_time, motor_final_time, motor_change_value, speedValue);
+    }
     analogWrite(PIN_O_MOTOR_UP, speedValue);
     digitalWrite(PIN_O_MOTOR_DOWN, LOW);
   } else {
     int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED_DOWN;
+    if (time <= motor_final_time) {
+      speedValue = map(time, motor_change_time, motor_final_time, motor_change_value, speedValue);
+    }
     analogWrite(PIN_O_MOTOR_DOWN, speedValue);
     digitalWrite(PIN_O_MOTOR_UP, LOW);
   }
 }
 
 void stopCabinMotor() {
-  digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
-  analogWrite(PIN_O_MOTOR_UP, SLOW_MOTOR_SPEED_UP);
-  digitalWrite(PIN_O_MOTOR_DOWN, LOW);
-
-  delay(10);
+  if (millis() - state_time <= 10) {
+    digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
+    analogWrite(PIN_O_MOTOR_UP, SLOW_MOTOR_SPEED_UP);
+    digitalWrite(PIN_O_MOTOR_DOWN, LOW);
+    return;
+  }
 
   motor_direction = down;
   motor_speed = stopped;
@@ -210,8 +246,10 @@ void stopCabinMotor() {
 void setCabinLight(LightMode light) {
   if (light == on) {
     digitalWrite(PIN_O_CABIN_LIGHT, HIGH);
-  } else {
+  } else if (light == off) {
     digitalWrite(PIN_O_CABIN_LIGHT, LOW);
+  } else {
+    digitalWrite(PIN_O_CABIN_LIGHT, getFlashingValue());
   }
 }
 void setButtonLight(int level, LightMode light) {
@@ -224,9 +262,18 @@ void setButtonLight(int level, LightMode light) {
 
   if (light == on) {
     digitalWrite(pin, HIGH);
-  } else {
+  } else if (light == off) {
     digitalWrite(pin, LOW);
+  } else {
+    digitalWrite(pin, getFlashingValue());
   }
+}
+
+int getFlashingValue() {
+  long t = millis();
+  t = t - state_time;
+  t = t % 500;
+  return t < 250 ? HIGH : LOW;
 }
 
 // ------------------------------
@@ -387,10 +434,7 @@ void loop() {
 }
 
 void testc() {
-  if (leave_testc_state == 1) {
-    leave_testc_state = 0;
-    setState(sleep_state);
-  }
+  // TODO:
 }
 
 void setState(OperationState newState) {
@@ -682,6 +726,7 @@ void wait() {
 }
 
 void maintenance() {
+  stopCabinMotor();
   setCabinLight(off);
 
   for (int i = 0; i < LEVEL_NUMBER; i++) {
@@ -690,13 +735,6 @@ void maintenance() {
 }
 
 void sleep() {
-
-  if (request_for_testc_state == 1) {
-    request_for_testc_state = 0;
-    setState(testc_state);
-    return;
-  }
-  
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     if (button_state[i] && level_position_state[i] == reached) {
       setState(opendoors_state);
@@ -789,28 +827,10 @@ void receiveEvent(int howMany) {
       Wire.read();
     }
   }
-  
   if (nbr_of_received_bytes == I2C_BUFFER) {
     int address = received_values[0];
-    
-    if (state != testc_state && request_for_testc_state == 0) {
-      int request = arrayToInt(&received_values[1]);
-      if (address == 0 && request == 1) {
-        request_for_testc_state = 1;
-      }
-      return;
-      
-    } else if (state != testc_state) {
-      return;
-     
-    } else if (address == 0) {
-      int request = arrayToInt(&received_values[1]);
-      if (address == 0 && request == 2) {
-        leave_testc_state = 1;
-      }
-      return;
-    
-    } else if (address == 1) {
+
+    if (address == 1) {
       state = (OperationState) arrayToInt(&received_values[1]);
 
     } else if (address == 2) {
@@ -907,7 +927,6 @@ void requestEvent() {
   if (state != testc_state) {
     queue_start = 0;
     queue_end = 0;
-    return;
   }
 
   if (queue_start < queue_end) {
