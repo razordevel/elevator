@@ -51,6 +51,38 @@ double tdl_measureSpeed (
                         tdl_measureSpeed_t * data
                     );
 
+/******************************************************************************/
+
+#define TDL_ISINMAINTENANCEMODE_IMPLEMENTED
+typedef struct {
+	int counter;
+} tdl_isInMaintenanceMode_t;
+
+/**
+*/
+double tdl_isInMaintenanceMode (
+                        ccdl_StatementReturnType * rp,
+                        const char * module,
+                        tdl_isInMaintenanceMode_t * data
+                    );
+
+/******************************************************************************/
+
+#define TDL_INITRELAYMATRIX_IMPLEMENTED
+typedef struct {
+	int counter;
+} tdl_initRelayMatrix_t;
+
+/**
+*/
+double tdl_initRelayMatrix (
+                        ccdl_StatementReturnType * rp,
+                        const char * module,
+                        tdl_initRelayMatrix_t * data
+                    );
+
+/******************************************************************************/
+
 
 
 #endif /* USERFUNCTIONS_H_ */

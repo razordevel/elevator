@@ -40,8 +40,70 @@ extern ccdl_te_parameterHandle _TDLP_DI_ROTARY_ENCODER_A;
 extern ccdl_te_parameterHandle _TDLP_DI_ROTARY_ENCODER_B;
 extern ccdl_te_parameterHandle _TDLP_CALC_ENCODER_SPEED;
 
+extern ccdl_te_parameterHandle _TDLP_CTRL_DI_FLOOR_LEVEL_0_LIGHT;
+extern ccdl_te_parameterHandle _TDLP_CTRL_DI_FLOOR_LEVEL_1_LIGHT;
+extern ccdl_te_parameterHandle _TDLP_CTRL_DI_FLOOR_LEVEL_2_LIGHT;
+
 static int readEncoderValue();
 static void transferEncoderInput(tdl_measureSpeed_t * data);
+
+extern int rt_gamma5x_init_srm();
+
+#define MAINTENANCE_MODE_COUNT	82
+
+static int maintenanceMode = false;
+static int onCount;
+static int offCount;
+static int toleranceCount;
+
+double tdl_initRelayMatrix(ccdl_StatementReturnType * rp, const char * module, tdl_initRelayMatrix_t * data)
+{
+	// Just initialize the SRM functions
+	rt_gamma5x_init_srm();
+	rp->code = RC_FINISHED;
+	
+	return 0;
+}
+
+double tdl_isInMaintenanceMode(ccdl_StatementReturnType * rp, const char * module, tdl_isInMaintenanceMode_t * data)
+{
+	int l0 = ccdl_te_getParValue(_TDLP_CTRL_DI_FLOOR_LEVEL_0_LIGHT);
+	int l1 = ccdl_te_getParValue(_TDLP_CTRL_DI_FLOOR_LEVEL_1_LIGHT);
+	int l2 = ccdl_te_getParValue(_TDLP_CTRL_DI_FLOOR_LEVEL_2_LIGHT);
+	
+	if (l0 == 1 && l1 == 1 && l2 == 1) {
+		// All lights are on
+		onCount++;
+		toleranceCount = 3;
+	}
+	else if (l0 == 0 && l1 == 0 && l2 == 0) {
+		// All lights are off
+		offCount++;
+		toleranceCount = 3;
+	}
+	else {
+		// Lights are different, abort detection
+		if (toleranceCount-- <= 0) {
+			onCount = 0;
+			offCount = 0;
+			toleranceCount = 0;
+			maintenanceMode = false;
+		}
+	}
+	
+	// Check if we have seen 250 ms on/off with all lights
+	if (onCount >= MAINTENANCE_MODE_COUNT && offCount >= MAINTENANCE_MODE_COUNT) {
+		maintenanceMode = true;
+		
+		// Limit counts
+		onCount = MAINTENANCE_MODE_COUNT;
+		offCount = MAINTENANCE_MODE_COUNT;
+	}
+	
+	rp->code = RC_FINISHED;
+
+	return maintenanceMode;
+}
 
 double tdl_measureSpeed(ccdl_StatementReturnType * rp, const char * module, tdl_measureSpeed_t * data)
 {
