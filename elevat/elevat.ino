@@ -20,6 +20,7 @@
 #define SLOW_MOTOR_SPEED_DOWN 63    // Motor speed for slow movement down. Value between 0 and 255
 #define ACCELERATE_MOTOR_TIME 2000  // Time in milliseconds to accelerate the motor to fast speed
 #define DECELERATE_MOTOR_TIME 1000  // Time in milliseconds to decelerate the motor from fast to slow speed
+#define MOTOR_STOP_REVERSE_TIME 10  // Time in milliseconds to move the motor up to do a good stop
 
 // Safety switch debounce buffer handling
 #define SAFETY_TIMING 2 // Milliseconds between measurements
@@ -94,8 +95,9 @@ enum DoorState {
 // State handling
 OperationState state = init_state; // Current state of the state machine
 OperationState last_state = init_state; // Previous state of the state machine in the last cycle
-long state_time = 0;
+long state_time = 0; // Holds the time the current state was entered.
 long state_cycle = 0; // Holds the number of times the current state is iterated.
+long cycle_time = 0; // Holds the time of the current cycle.
 
 // Position handling
 int level_position = -1;
@@ -174,7 +176,7 @@ void stopDoors() {
 
 void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
   if (motor_speed != speed) {
-    motor_change_time = millis();
+    motor_change_time = cycle_time;
     motor_final_time = motor_change_time;
     switch (motor_speed) {
       case stopped:
@@ -205,7 +207,7 @@ void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
   motor_direction = direction;
   motor_speed = speed;
 
-  long time = millis();
+  long time = cycle_time;
 
   digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
   if (direction == up) {
@@ -226,7 +228,7 @@ void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
 }
 
 void stopCabinMotor() {
-  if (millis() - state_time <= 10) {
+  if (cycle_time - state_time <= MOTOR_STOP_REVERSE_TIME) {
     digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
     analogWrite(PIN_O_MOTOR_UP, SLOW_MOTOR_SPEED_UP);
     digitalWrite(PIN_O_MOTOR_DOWN, LOW);
@@ -272,7 +274,7 @@ void setButtonLight(int level, LightMode light) {
 }
 
 int getFlashingValue() {
-  long t = millis();
+  long t = cycle_time;
   t = t - state_time;
   t = t % 500;
   return t < 250 ? HIGH : LOW;
@@ -399,6 +401,7 @@ void setStatusLEDs() {
 // Arduino Loop Function. Will be called in an endless loop.
 void loop() {
   state_cycle++;
+  cycle_time = millis();
 
   transferInputs();
 
@@ -443,7 +446,7 @@ void testc() {
 }
 
 void setState(OperationState newState) {
-  state_time = millis();
+  state_time = cycle_time;
 
   // TODO: accept only valid state changes
 
@@ -466,7 +469,7 @@ void transferButtonInputs() {
 void transferEncoderInput() {
   // Encoder Input
   int newValue = readEncoderValue();
-  long newTime = millis();
+  long newTime = cycle_time;
 
   if (encoder_time == newTime) {
     return;
@@ -615,12 +618,11 @@ boolean readSafetySwitch(int pin) {
 }
 
 void transferSafetySwitch() {
-  long now = millis();
-  if (now < safetyTime + SAFETY_TIMING) {
+  if (cycle_time < safetyTime + SAFETY_TIMING) {
     return;
   }
 
-  safetyTime = now;
+  safetyTime = cycle_time;
   safetyBufferIndex++;
   if (safetyBufferIndex >= SAFETY_BUFFER_SIZE) {
     safetyBufferIndex = 0;
@@ -654,8 +656,6 @@ int findTargetLevel() {
 }
 
 void moveCabin() {
-  long time = millis(); // The current time in millis
-
   // Check if we just entered the current door movement state
   if (state_cycle == 1) {
     level_target = findTargetLevel();
@@ -705,25 +705,21 @@ void closeDoors() {
 }
 
 void moveDoors(int fromPosition, int toPosition) {
-  long time = millis(); // The current time in millis
-
   // Check if we just entered the current door movement state
   if (state_cycle == 1) {
     // Init door movement parameters
     long remainTime = map(door_position, fromPosition, toPosition, DOOR_SPEED, 0);
-    door_start_time = map(fromPosition, door_position, toPosition, time, time + remainTime);
+    door_start_time = map(fromPosition, door_position, toPosition, cycle_time, cycle_time + remainTime);
     door_end_time = door_start_time + DOOR_SPEED;
   }
 
-  door_position = map(time, door_start_time, door_end_time, fromPosition, toPosition);
+  door_position = map(cycle_time, door_start_time, door_end_time, fromPosition, toPosition);
 
   setDoorPositions(door_position);
 }
 
 void wait() {
-  long time = millis(); // The current time in millis
-
-  if (time >= state_time + DOOR_WAIT_TIME) {
+  if (cycle_time >= state_time + DOOR_WAIT_TIME) {
     setState(closedoors_state);
   } else {
     delay(1);
