@@ -29,26 +29,28 @@ static const long STOP_TIME = 100;
 static const int I2C_BUFFER = 5; // 1 address byte and 4 byte to set
 
 // Pin constants
-static const int PIN_O_MOTOR_ENABLE = 2;     // port pin 3
-static const int PIN_O_MOTOR_UP = 3;         // port pin 4
-static const int PIN_I_SAFETY_UP = 50;       // port pin 5
-static const int PIN_O_MOTOR_DOWN = 4;       // port pin 6
-static const int PIN_I_SAFETY_DOWN = 52;     // port pin 7
-static const int PIN_I_TEMPERATURE = 1;      // port pin 10
-static const int PIN_I_ENCODER_A = 38;       // port pin 11
-static const int PIN_I_ENCODER_B = 40;       // port pin 12
-static const int PIN_I_LEVEL_0 = 36;         // port pin 13
-static const int PIN_I_LEVEL_1 = 28;         // port pin 14
-static const int PIN_I_LEVEL_2 = 30;         // port pin 15
-static const int PIN_O_DOOR_LEFT = 6;        // port pin 16
-static const int PIN_O_DOOR_RIGHT = 5;       // port pin 17
-static const int PIN_I_LEVEL_BUTTON_0 = 34;  // port pin 18
-static const int PIN_O_LEVEL_LIGHT_0 = 11;//46;   // port pin 19
-static const int PIN_I_LEVEL_BUTTON_1 = 32;  // port pin 20
-static const int PIN_O_LEVEL_LIGHT_1 = 10;//44;   // port pin 21
-static const int PIN_I_LEVEL_BUTTON_2 = 26;  // port pin 22
-static const int PIN_O_LEVEL_LIGHT_2 = 9;//42;   // port pin 23
-static const int PIN_O_CABIN_LIGHT = 48;     // port pin 24
+#define PIN_O_MOTOR_ENABLE 2     // port pin 3
+#define PIN_O_MOTOR_UP 3         // port pin 4
+#define PIN_I_SAFETY_UP 50       // port pin 5
+#define PIN_O_MOTOR_DOWN 4       // port pin 6
+#define PIN_I_SAFETY_DOWN 52     // port pin 7
+#define PIN_I_TEMPERATURE 1      // port pin 10
+#define PIN_I_ENCODER_A 38       // port pin 11
+#define PIN_I_ENCODER_B 40       // port pin 12
+#define PIN_I_LEVEL_0 36         // port pin 13
+#define PIN_I_LEVEL_1 28         // port pin 14
+#define PIN_I_LEVEL_2 30         // port pin 15
+#define PIN_O_DOOR_LEFT 6        // port pin 16
+#define PIN_O_DOOR_RIGHT 5       // port pin 17
+#define PIN_I_LEVEL_BUTTON_0 34  // port pin 18
+#define PIN_O_LEVEL_LIGHT_0 46   // port pin 19
+#define PIN_I_LEVEL_BUTTON_1 32  // port pin 20
+#define PIN_O_LEVEL_LIGHT_1 44   // port pin 21
+#define PIN_I_LEVEL_BUTTON_2 26  // port pin 22
+#define PIN_O_LEVEL_LIGHT_2 42   // port pin 23
+#define PIN_O_CABIN_LIGHT 48     // port pin 24
+#define PIN_O_GREEN_STATUS 12    // Green Status LED
+#define PIN_O_RED_STATUS 13      // Red Status LED
 
 // ------------------------------
 // Enum definitions
@@ -134,7 +136,7 @@ int queue_end = 0;
 void setDoorPositions(int position) {
   int left = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_LEFT_CLOSED, DOOR_LEFT_OPEN);
   int right = map(position, DOOR_CLOSED_POSITION, DOOR_OPEN_POSITION, DOOR_RIGHT_CLOSED, DOOR_RIGHT_OPEN);
-  servo_left.write(left);  
+  servo_left.write(left);
   servo_right.write(right);
   //analogWrite(PIN_O_DOOR_LEFT, left);
   //analogWrite(PIN_O_DOOR_RIGHT, right);
@@ -148,7 +150,7 @@ void moveCabinMotor(MotorSpeed speed, MotorDirection direction) {
     stopCabinMotor();
     return;
   }
-  
+
   digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
   if (direction == up) {
     int speedValue = speed == fast ? FAST_MOTOR_SPEED : SLOW_MOTOR_SPEED_UP;
@@ -250,19 +252,16 @@ float readTemperature() {
 // Arduino Setup Function. Will be called once after system boot.
 void setup() {
   // put your setup code here, to run once:
-  
+
   // Setup input and output channels
-  pinMode(9, OUTPUT);
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
-  pinMode(12, OUTPUT);
+  // Setup input and output channels
+  pinMode(PIN_O_RED_STATUS, OUTPUT);
+  pinMode(PIN_O_GREEN_STATUS, OUTPUT);
   pinMode(PIN_O_MOTOR_ENABLE, OUTPUT);
   pinMode(PIN_O_MOTOR_UP, OUTPUT);
   pinMode(PIN_O_MOTOR_DOWN, OUTPUT);
   servo_left.attach(PIN_O_DOOR_LEFT);
   servo_right.attach(PIN_O_DOOR_RIGHT);
-//  pinMode(PIN_O_DOOR_LEFT, OUTPUT);
-//  pinMode(PIN_O_DOOR_RIGHT, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_0, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_1, OUTPUT);
   pinMode(PIN_O_LEVEL_LIGHT_2, OUTPUT);
@@ -278,7 +277,7 @@ void setup() {
   pinMode(PIN_I_LEVEL_0, INPUT);
   pinMode(PIN_I_LEVEL_1, INPUT);
   pinMode(PIN_I_LEVEL_2, INPUT);
-  
+
   // Setup arrays
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     button_state[i] = false;
@@ -311,36 +310,19 @@ int value = (high + low) / 2;
 
 // Arduino Loop Function. Will be called in an endless loop.
 void loop() {
-  servo_left.write(value);
-  servo_right.write(high + low - value);
-    
-  digitalWrite(9, LOW);
-  digitalWrite(10, LOW);
-  digitalWrite(11, LOW);
-  digitalWrite(12, LOW);
-
-  if (readLevelButton(0)) {
-    digitalWrite(11, HIGH);
-    value = low;
-    //moveCabinMotor(fast, down);
-  } else if (readLevelButton(1)) {
-    digitalWrite(10, HIGH);
-    value = (high + low) / 2;
-    //stopCabinMotor();
-  } else if (readLevelButton(2)) {
-    digitalWrite(9, HIGH);
-    value = high;
-    //moveCabinMotor(fast, up);
-  }
+  setCabinLight(on);
+  setButtonLight(0, on);
+  setButtonLight(1, on);
+  setButtonLight(2, on);
 
   delay(10);
- /*
-  if (digitalRead(PIN_I_SAFETY_UP) == HIGH) {
-    digitalWrite(11, HIGH);
-  }
-  if (digitalRead(PIN_I_SAFETY_DOWN) == HIGH) {
-    digitalWrite(12, HIGH);
-  }*/
+  /*
+    if (digitalRead(PIN_I_SAFETY_UP) == HIGH) {
+     digitalWrite(11, HIGH);
+    }
+    if (digitalRead(PIN_I_SAFETY_DOWN) == HIGH) {
+     digitalWrite(12, HIGH);
+    }*/
 }
 
 void testc() {
@@ -649,13 +631,13 @@ void initialize() {
 
   if (init_direction == up) {
     moveCabinMotor(fast, up);
-    
+
     if (safetyUp) {
       init_direction = down;
     }
   } else if (init_direction == down) {
     moveCabinMotor(fast, down);
-    
+
     if (safetyDown) {
       init_direction = up;
     }
