@@ -362,10 +362,6 @@ void setup() {
   Wire.onReceive(receiveEvent); // register event
   Wire.onRequest(requestEvent); // register event
 
-  // Setup serial
-  Serial.begin(9600);           // start serial for output
-  Serial.println("setup end");
-
   // Init state machine
   setState(init_state);
 
@@ -808,7 +804,8 @@ boolean isAnyLevelClose() {
   return false;
 }
 
-void intToCharArray(char *buf, int val) {
+void intToCharArray(char *buf, int value) {
+  unsigned int val = (unsigned int) value;
   buf[0] = (val >> 24) & 0xff;
   buf[1] = (val >> 16) & 0xff;
   buf[2] = (val >> 8) & 0xff;
@@ -828,7 +825,7 @@ void receiveEvent(int howMany) {
 
   nbr_of_received_bytes = 0;
   while (Wire.available() > 0) {
-    if (nbr_of_received_bytes < I2C_BUFFER && state == testc_state) {
+    if (nbr_of_received_bytes < I2C_BUFFER) {
       received_values[nbr_of_received_bytes++] = Wire.read();
     } else {
       Wire.read();
@@ -849,7 +846,7 @@ void receiveEvent(int howMany) {
      
     } else if (address == 0) {
       int request = arrayToInt(&received_values[1]);
-      if (address == 0 && request == 2) {
+      if (request == 2) {
         leave_testc_state = 1;
       }
       return;
@@ -951,6 +948,7 @@ void requestEvent() {
   if (state != testc_state) {
     queue_start = 0;
     queue_end = 0;
+    Wire.write("ERRO");
     return;
   }
 
