@@ -399,6 +399,10 @@ void loop() {
   state_cycle++;
   cycle_time = millis();
 
+  if (state == testc_state && leave_testc_state == 0) {
+	  return;
+  }
+  
   transferInputs();
 
   setStatusLEDs();
@@ -733,11 +737,16 @@ void maintenance() {
 
 void sleep() {
 
+  if (state == testc_state) {
+	  return;
+  }
+  
   if (request_for_testc_state == 1) {
     request_for_testc_state = 0;
     setState(testc_state);
     return;
   }
+  
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     if (button_state[i] && level_position_state[i] == reached) {
       setState(opendoors_state);
