@@ -5,3 +5,7 @@ results
 *.bak
 
 /sample.ccd
+/.interface_simple/
+/.userfunctions/
+/.include/
+/.results/

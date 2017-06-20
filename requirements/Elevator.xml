@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<documentlist>
+	<exportinfo
+	    user="wittner"
+	    date="2017-03-11 23:41:15+0100">
+	</exportinfo>
+	<requirementdocument
+	    name="Elevator"
+	    description=""
+	    alias="EL"
+	    version="1.2">
+		<attributelist>
+			<attribute
+			    name="Content Type"
+			    description=""
+			    type="STRING"
+			    value="PLAIN"
+			    flags="1"
+			    isVersioned="false"/>
+			<attribute
+			    name="Enable Evaluation"
+			    description="Enables/disables the evaluation of requirements from the document."
+			    type="BOOLEAN"
+			    value="true"
+			    flags="1"
+			    isVersioned="false"/>
+			<attribute
+			    name="Enable Suspicious Calculation"
+			    description="Controls the formatting of requirements, possible values are: PLAIN (the default) and HTML."
+			    type="BOOLEAN"
+			    value="true"
+			    flags="1"
+			    isVersioned="false"/>
+		</attributelist>
+		<chapter
+		    name="General"
+		    version="1.0"
+		    id="33"
+		    number="1"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Safety Requirements"
+			    version="1.0"
+			    id="34"
+			    number="1.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="35"
+				    shortdescription="Power breakdown"
+				    text="IF power brakdown is detected THEN the car should automatically move to the nearest floor at a low speed AND stop."
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="36"
+				    shortdescription="Sensor defect recognition"
+				    text="IF safety relevant sensor defects are detected THEN the elevator should go into maintenance mode. "
+				    priority="UNDEFINED"
+				    version="1.2"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="31"
+				    shortdescription="Cabin operation range"
+				    text="The elevator should only operate between the FloorMin and FloorMax. "
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="40"
+				    shortdescription="Car control in case of malfunction"
+				    text="IF any malfunction is detected between floors AND  IF the controller has diagnosed it safe to operate the car THEN the car should automatically move to the nearest floor at a low speed AND stop with the doors open."
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+		<chapter
+		    name="Dispatcher"
+		    version="1.0"
+		    id="43"
+		    number="2"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Functional Requirements"
+			    version="1.0"
+			    id="44"
+			    number="2.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="12"
+				    shortdescription="Floor level button action"
+				    text="IF the level call button is pressed THEN move to the target floor directly."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="45"
+				    shortdescription="Intermediate stops  to enter or leave the car"
+				    text="IF the car is moving towards its destination floor AND still has not reached it yet AND he corresponding level call button has been pressed THEN  the car should stop at each floor on the route."
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="46"
+				    shortdescription="Ignoring opposite floors"
+				    text="All level request of opposite floors should not be considered while moving to the destination floor. "
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="47"
+				    shortdescription="Starvation prevention"
+				    text="Means to prevent a livelock between floors must be implemented."
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+		<chapter
+		    name="Cabin Door"
+		    version="1.0"
+		    id="18"
+		    number="3"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Functional Requirements"
+			    version="1.0"
+			    id="25"
+			    number="3.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="7"
+				    shortdescription="Door opening action"
+				    text="IF the cabin reaches the target level THEN  open the cabin door"
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="14"
+				    shortdescription="Door opening time"
+				    text="IF target level is reached THEN the cabin door must remain fully open for 3 seconds."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="38"
+				    shortdescription="Door open/close speed"
+				    text="Doors should open and close with constant speed."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="15"
+				    shortdescription="Door reopen action"
+				    text="IF the cabin door is closing AND the level call button is pressed THEN the cabin door should reopen."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+			<chapter
+			    name="Safety Requirements"
+			    version="1.0"
+			    id="26"
+			    number="3.2"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="2"
+				    shortdescription="Door opening when stopped"
+				    text="If the cabin doesn&apos;t move THEN opening of the cabin door shall be possible."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="1"
+				    shortdescription="Cabin lock status"
+				    text="IF the cabin door is open THEN moving the cabine is not possible."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="16"
+				    shortdescription="Door blocked sensor"
+				    text="IF the door blocked sensor returns a positive signal THEN don&apos;t close the Door."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+		<chapter
+		    name="Level Call Button"
+		    version="1.0"
+		    id="19"
+		    number="4"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Functional Requirements"
+			    version="1.0"
+			    id="27"
+			    number="4.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="3"
+				    shortdescription="Activation condition"
+				    text="IF no level call button is pressed THEN the cabin shall not move."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="37"
+				    shortdescription="Multiple cabin floor button selections"
+				    text="Selection of multiple floors from within the car shall be possible."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+		<chapter
+		    name="Error Indicator Light"
+		    version="1.0"
+		    id="20"
+		    number="5"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Safety Requirements"
+			    version="1.0"
+			    id="28"
+			    number="5.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="9"
+				    shortdescription="Error indication"
+				    text="IF any error is detected THEN the system shall switch into maintenance mode and turn on error indicator lights: All level button lights shall flash with a period of 2 Hz."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+		<chapter
+		    name="Level Call Light"
+		    version="1.0"
+		    id="21"
+		    number="6"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Functional requirements"
+			    version="1.0"
+			    id="29"
+			    number="6.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="8"
+				    shortdescription="Button lights"
+				    text="If Level Call Button is pressed, then Level Call Light shall be on, until Cabin arrived"
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+		<chapter
+		    name="Cabin Motor"
+		    version="1.0"
+		    id="22"
+		    number="7"
+		    chapterlevel="1"
+		    creationuser="wittner"
+		    creationdate="2017-03-11 17:30:41+0100"
+		    modificationuser="wittner"
+		    modificationdate="2017-03-11 17:30:41+0100">
+			<attributelist>
+			</attributelist>
+			<chapter
+			    name="Functional Requirements"
+			    version="1.0"
+			    id="30"
+			    number="7.1"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="41"
+				    shortdescription="Speed"
+				    text="The car&apos;s traveling speed for lifting and lowering should be the same."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="42"
+				    shortdescription="Traveling speed delay"
+				    text="The car should not stop abrupt at the destination floor. Before reaching the destination floor the traveling speed should be delayed. "
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="10"
+				    shortdescription="Speed deceleration"
+				    text="IF the cabin is recognized by any target level position sensor THEN slow down movement."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:21:01+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="4"
+				    shortdescription="IF the cabin has reached correct Position THEN stop the cabin motor."
+				    text="If Level Position Sensor recognized the Cabin, then stop Cabin Motor, when LPS has a negative signal the first time"
+				    priority="UNDEFINED"
+				    version="1.0"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 17:30:41+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+			<chapter
+			    name="Safety Requirements"
+			    version="1.0"
+			    id="39"
+			    number="7.2"
+			    chapterlevel="2"
+			    creationuser="wittner"
+			    creationdate="2017-03-11 17:30:41+0100"
+			    modificationuser="wittner"
+			    modificationdate="2017-03-11 17:30:41+0100">
+				<attributelist>
+				</attributelist>
+				<requirement
+				    id="5"
+				    shortdescription="IF the cabin motor is overheated THEN stop AND turn on indicator light."
+				    text="If temperature of the Cabin Motor Tempearture Sensor recognizes a temperatur, that is higher than the maximum temperature minus 10 degree, then stop the Cabin Motor."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:03:27+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="24"
+				    shortdescription="Emergency stop downwards"
+				    text="IF the cabin passes lowest level THEN stop the cabin motor AND turn error indicator light on."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:03:27+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="23"
+				    shortdescription="Emergeny stop upwards"
+				    text="IF the cabin passes highest level THEN stop Cabin Motor AND turn error indicator light on."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:03:27+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+				<requirement
+				    id="6"
+				    shortdescription="IF the cabin is overcharged THEN stop AND turn on indicator light."
+				    text="If the Cabin Door is open and the Level Position Sensor recognizes movement, although the Cabin Motor is turned off, then turn on Error Indicator Light and don&apos;t activate any motor."
+				    priority="UNDEFINED"
+				    version="1.1"
+				    creationuser="wittner"
+				    creationdate="2017-03-11 17:30:41+0100"
+				    modificationuser="wittner"
+				    modificationdate="2017-03-11 23:03:27+0100">
+					<attributelist>
+					</attributelist>
+				</requirement>
+			</chapter>
+		</chapter>
+	</requirementdocument>
+</documentlist>
