@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<configuration version="3.0">
+ <environments>
+  <compiler name="GNU GCC">
+   <properties/>
+   <target name="GNU GVD">
+    <properties/>
+    <environment name="(Default)">
+     <properties>
+      <property type="File" name="Makefile Template" value="$(TESSY_SYSPATH)\templates\make\ts_make_socket.tpl" flags="0x80000079"/>
+     </properties>
+    </environment>
+   </target>
+   <target name="Eclipse CDT">
+    <properties/>
+    <environment name="(Default)">
+     <properties>
+      <property type="File" name="Makefile Template" value="$(TESSY_SYSPATH)\templates\make\ts_make_socket.tpl" flags="0x80000079"/>
+     </properties>
+    </environment>
+   </target>
+  </compiler>
+  <compiler name="GNU GCC.GNU GCC (C++)" display="GNU GCC (C++)">
+   <properties/>
+   <target name="Eclipse CDT">
+    <properties/>
+    <environment name="(Default)">
+     <properties>
+      <property type="File" name="Makefile Template" value="$(TESSY_SYSPATH)\templates\make\ts_make_socket++.tpl" flags="0x80000079"/>
+     </properties>
+    </environment>
+   </target>
+  </compiler>
+ </environments>
+</configuration>

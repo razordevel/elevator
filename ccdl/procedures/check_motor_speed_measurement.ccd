@@ -21,7 +21,7 @@ test step 1:
 
 		// Check that motor gets running
 	during 500 [ms] .. 1000 [ms]: {
-		expect CTRL_AI_CABIN_MOTOR_SPEED_UP > 200
+		expect CTRL_AI_CABIN_MOTOR_SPEED_DOWN > 200
 		expect CTRL.measureSpeed () > 1000
 		set TMP_MEASURE_POINT to CTRL.measureSpeed ()
 	}
