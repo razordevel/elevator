@@ -1,0 +1,116 @@
+#******************************************************************************
+#
+# DESCRIPTION
+# -----------
+# this file contains the unit definitions, used by the CCDL compiler
+#
+#******************************************************************************
+
+> distance
+m 1 0
+dm 0.1 0
+cm 0.01 0
+mm 0.001 0
+km 1000 0
+ft 3.2808399 0
+
+> time
+s   1   0
+sec 1   0
+seconds 1   0
+second  1   0
+ms  1000    0
+msec    1000    0
+us  1000000 0
+ns  1000000000    0
+min 16.66667e-3 0
+h   277.7778e-6 0
+day 1.15740740e-5	0
+year 3.170979e-8	0
+month 3.805175e-7 0
+
+> speed
+m/s 1   0
+kts 1.94384 0
+km/h    3.6 0
+mph 2.23694 0
+ft/s    3.2804812   0
+ft/min  196.82887   0
+mach    0.00302115  0
+
+> pressure
+bar 1   0
+mbar    1000    0
+Pa  100000  0
+hPa 1000    0
+kPa 100 0
+psi 14.50326    0
+
+> angle
+deg 1   0
+degree  1   0
+rad 0.01745 0
+
+> force
+N   1   0
+Newton  1   0
+daN 0.1 0
+hN  0.01    0
+kN  0.001   0
+kp  0.1019680   0
+
+> torque
+Nm  1   0
+daNm    0.1 0
+hNm 0.01    0
+kNm 0.001   0
+
+> mass
+kg  1   0
+g   1000    0
+ton 0.001   0
+
+> frequency_or_rotation
+Hz  1   0
+kHz  1e-3 0
+MHz  1e-6 0
+Hertz   1   0
+deg/s   0.027777777 0
+deg/sec   0.027777777 0
+rad/s   6.283185307 0
+rpm 	60 0
+
+> voltage
+V   1   0
+Volt    1   0
+mV  1000    0
+
+> current
+A   1   0
+Ampere  1   0
+mA  1000    0
+
+> resistance
+Ohm 1   0
+kOhm    0.001   0
+
+> inductance
+Henry   1   0
+mH  1000    0
+uH  1000000 0
+
+> capacity
+F   1   0
+Farad   1   0
+mF  1000    0
+uF  1000000 0
+
+> temperature
+degC    1   0
+C  1   0
+Celsius 1   0
+K   1   -273.15
+
+> invalid unit
+none 1 0
+TBD 1 0

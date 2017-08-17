@@ -1,0 +1,10 @@
+# Version:	$Rev: testing.ccdextension $
+
+FLOPS   1   0
+
+# the following are required by ccd2c...
+s   1   0
+us  1000000 0
+
+> invalid unit
+none 1 0

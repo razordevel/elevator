@@ -1,0 +1,38 @@
+ccd
+initial conditions:
+{
+	CTRL.initRelayMatrix ()
+	wait 1 [s]
+
+	// Drive elevator to level 0
+	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to ON
+	wait 500 [ms]
+	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to OFF
+
+	//	wait until CTRL_AI_CABIN_MOTOR_SPEED_ENABLED < 10
+
+	// Wait for opening/closing of doors
+	wait 9 [s]
+}
+
+test step 1:
+{
+	monitor not CTRL.isInMaintenanceMode ()
+
+	// Drive elevator to level 2
+	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON
+	after 500 [ms]:
+		set CTRL_DO_FLOOR_LEVEL_2_BUTTON to OFF
+
+		// Disconnect level 2 sensor pin
+	after 2 [s]:
+		disconnect pin SRM.FLOOR_LEVEL_0_SENSOR+ for 200 [ms]
+
+		// CTRL_DI_FLOOR_LEVEL_2_LIGHT
+	within 2 [s] .. 4 [s]: {
+		expect 10 transitions of CTRL_DI_FLOOR_LEVEL_[0;1;2]_LIGHT
+	}
+
+	wait 10 [s]
+}
+end of ccd

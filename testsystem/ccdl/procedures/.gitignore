@@ -1,0 +1,11 @@
+include
+interface_simple
+results
+/Makefile
+*.bak
+
+/sample.ccd
+/.interface_simple/
+/.userfunctions/
+/.include/
+/.results/

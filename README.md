@@ -1,6 +1,7 @@
-# elevator
-Project with source code and documentation for our elevator exhibition demonstrator.
+# Razorcat Elevator Demonstrator
+Project with source code and documentation for the Razorcat elevator exhibition demonstrator.
 
-The elevat.ino directory contains the Arduino code for the elevator controller.
+For a short reference about the project you can read the following german article:
+http://www.all-electronics.de/real-time-blackbox-systemtest-fuer-steuersystem-und-hardware-aufbau/
 
-The wiring image contains the wiring, components and pin definitions for the electrical components of the elevator.
+The project contains three directories for the three different parts of the demonstrator; elevator, controller and test system. Each directory contains informations about the used hardware and software if available.

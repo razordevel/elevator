@@ -1,0 +1,40 @@
+ccd
+initial conditions:
+{
+	wait 0.5 [s]
+	
+}
+
+test step 1:
+{
+// DI_ROTARY_ENCODER_A
+// DI_ROTARY_ENCODER_B
+// CALC_ENCODER_SPEED
+	set CTRL_DO_FLOOR_LEVEL_1_BUTTON to ON
+	wait 200 [ms]
+	set CTRL_DO_FLOOR_LEVEL_1_BUTTON to OFF
+
+	during 2 [s] .. 12 [s]: {
+		expect CTRL.measureSpeed () > 5
+	}
+
+	wait 13 [s]
+}
+
+/* *** ================================================================== *** */
+Test Step 2:
+/* *** ------------------------------------------------------------------ *** */
+{
+// 
+	after 200 [ms]:
+		set DO_ROTARY_ENCODER_A to 1
+	after 400 [ms]: {
+		set DO_ROTARY_ENCODER_A to 0
+		set DO_ROTARY_ENCODER_B to 1
+	}
+	after 600 [ms]:
+		set DO_ROTARY_ENCODER_B to 0
+
+	wait 1 [s]
+}
+end of ccd
