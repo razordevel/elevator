@@ -1,7 +1,15 @@
 ccd
 initial conditions:
 {
-	wait 1 [s]
+	// Drive elevator to level 0
+	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to ON
+	wait 500 [ms]
+	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to OFF
+
+	//	wait until CTRL_AI_CABIN_MOTOR_SPEED_ENABLED < 10
+
+	// Wait for opening/closing of doors
+	wait 9 [s]
 }
 
 test step 1:

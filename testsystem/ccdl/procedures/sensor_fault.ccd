@@ -9,7 +9,7 @@ initial conditions:
 	wait 500 [ms]
 	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to OFF
 
-	//	wait until CTRL_AI_CABIN_MOTOR_SPEED_ENABLED < 10
+	wait until CTRL_AI_CABIN_MOTOR_SPEED_ENABLED < 10
 
 	// Wait for opening/closing of doors
 	wait 9 [s]
@@ -17,20 +17,21 @@ initial conditions:
 
 test step 1:
 {
-	monitor not CTRL.isInMaintenanceMode ()
 
 	// Drive elevator to level 2
 	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON
 	after 500 [ms]:
 		set CTRL_DO_FLOOR_LEVEL_2_BUTTON to OFF
+		
+	set trigger FAILURE_INJECT after 4 [s]
 
-		// Disconnect level 2 sensor pin
-	after 2 [s]:
-		disconnect pin SRM.FLOOR_LEVEL_0_SENSOR+ for 200 [ms]
+	// Disconnect level 2 sensor pin
+	after FAILURE_INJECT:
+		disconnect pin SRM.FLOOR_LEVEL_[0;1]_SENSOR+ for 200 [ms]
 
-		// CTRL_DI_FLOOR_LEVEL_2_LIGHT
-	within 2 [s] .. 4 [s]: {
-		expect 10 transitions of CTRL_DI_FLOOR_LEVEL_[0;1;2]_LIGHT
+	// Check for maintenance mode
+	within FAILURE_INJECT & 0.5 [s] .. FAILURE_INJECT & 2.5 [s]: {
+		expect 8 transitions of CTRL_DI_FLOOR_LEVEL_[0;1;2]_LIGHT
 	}
 
 	wait 10 [s]
