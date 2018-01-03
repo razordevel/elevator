@@ -1,0 +1,1 @@
+cc   -fmessage-length=0 -std=c99 -pipe -Wall -Wextra -Wpointer-arith -Wcast-align -Wfloat-equal -Wwrite-strings -Wno-unused-parameter -O2 -g -DNDEBUG -I/opt/gamma/include -o pi_srm.c.o   -c pi_srm.c&&/usr/bin/ar cr libsrm_gamma5x.a  pi_srm.c.o&&/usr/bin/ranlib libsrm_gamma5x.a&&cp -v libsrm_gamma5x.a /usr/lib/arm-linux-gnueabihf/libsrm_gamma5x.a
