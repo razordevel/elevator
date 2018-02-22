@@ -771,33 +771,38 @@ void initialize() {
 
   setDoorPositions(DOOR_CLOSED_POSITION);
 
-  for (int i = 0; i < LEVEL_NUMBER; i++) {
-    if (level_position_state[i] == reached) {
+  // Move Cabin down until motor stops because of safety switch.
+  // If Cabin at lowest point and level 0 sensor blocked move up to level sensor gap.
+  if (init_direction == down) {
+    moveCabinMotor(fast, down);
+
+    if (safetyDown) {
       stopCabinMotor();
-      stopDoors();
-      setState(sleep_state);
-      return;
+      int blockedLevel = readBlockedLevelSensor();
+      if (blockedLevel == 0) {
+        level_position_state[0] = close_below;
+      } else if (blockedLevel < 0) {
+        level_position_state[0] = far_below;
+      }
+      setOutsideLevelStates(0);
+      init_direction = up;
     }
-  }
+  } else if (init_direction == up) {
+    MotorSpeed initSpeed = isAnyLevelClose() ? slow : fast;
+    moveCabinMotor(initSpeed, up);
 
-  MotorSpeed speedValue = isAnyLevelClose() ? slow : fast;
-
-  // Move Cabin down until level is reached or motor stops because of safety switch.
-  // If Cabin at lowest point move up again until level is reached.
-
-  if (init_direction == up) {
-    moveCabinMotor(speedValue, up);
+    for (int i = 0; i < LEVEL_NUMBER; i++) {
+      if (level_position_state[i] == reached) {
+        stopCabinMotor();
+        stopDoors();
+        setState(sleep_state);
+        return;
+      }
+    }
 
     if (safetyUp) {
       stopCabinMotor();
       init_direction = down;
-    }
-  } else if (init_direction == down) {
-    moveCabinMotor(speedValue, down);
-
-    if (safetyDown) {
-      stopCabinMotor();
-      init_direction = up;
     }
   } else {
     init_direction = down;
