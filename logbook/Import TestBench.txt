@@ -1,0 +1,13 @@
+position number	test bench	position description	finCI
+10	Elevator Rig	Cabin Servo 1	
+11	Elevator Rig	Cabin Servo 2	
+20	Elevator Rig	Level Sensor 1	
+21	Elevator Rig	Level Sensor 2	
+22	Elevator Rig	Level Sensor 3	
+30	Elevator Rig	Level Button 1	
+31	Elevator Rig	Level Button 2	
+32	Elevator Rig	Level Button 3	
+40	Elevator Rig	Cabin Motor	
+41	Elevator Rig	Cabin Motor Control IC	
+100	Controller	Software Version	
+200	Controller	Hardware	

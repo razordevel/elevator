@@ -1,0 +1,11 @@
+		Positions																			
+Event Group	Event Definition	10	20	30	40	50	60	70	80	90	100	110	120	130	140	150	160	170	180	190	200
+Cycles	Cycle A	1	0	0	0	1	0	0	0	1	0	0	0	1	0	0	0	0	1	0	0
+Cycles	Cycle B	1	0	0	0	1	0	0	0	1	0	0	0	0	1	0	0	0	1	0	0
+Cycles	Cycle C	1	0	0	0	1	0	0	0	1	0	0	0	0	0	1	0	0	1	0	0
+Settings	Setting A	0	1	0	0	0	1	0	0	0	1	0	0	1	0	0	0	0	1	0	0
+Settings	Setting B	0	1	0	0	0	1	0	0	0	1	0	0	0	1	0	0	0	1	0	0
+Settings	Setting C	0	1	0	0	0	1	0	0	0	1	0	0	0	0	1	0	0	1	0	0
+Impact	Impact A	0	0	1	0	0	0	1	0	0	0	1	0	1	0	0	0	0	1	0	0
+Impact	Impact B	0	0	1	0	0	0	1	0	0	0	1	0	0	1	0	0	0	1	0	0
+Impact	Impact C	0	0	1	0	0	0	1	0	0	0	1	0	0	0	1	0	0	1	0	0
