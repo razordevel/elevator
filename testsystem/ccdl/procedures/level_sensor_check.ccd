@@ -1,27 +1,23 @@
 ccd
 initial conditions:
 {
+	CTRL.initRelayMatrix()
+
+	// Reset elevator to level 0
+	set CTRL_DO_RESET to ON for 200 [ms]
 	wait 1 [s]
-
-	// Drive elevator to level 0
-	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to ON
-	wait 500 [ms]
-	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to OFF
-
-	wait until CTRL_AI_CABIN_MOTOR_SPEED_ENABLED < 10
-
-	// Wait for opening/closing of doors
-	wait 9 [s]
+	wait until CTRL_AI_ERROR_MODE = 0
 }
 
 test step 1, timeout 80 [s]:
 {
-// Drive elevator to level 2
-	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON
-	after 500 [ms]:
-		set CTRL_DO_FLOOR_LEVEL_2_BUTTON to OFF
+	// Drive elevator to level 2
+	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON for 200 [ms]
 
 	set trigger T_END when CTRL_DI_FLOOR_LEVEL_2_SENSOR = 0 & 2 [s]
+
+	wait 1 [s]
+	monitor CTRL.measureSpeed() > 0
 
 	// Check floor level sensors
 	// Level 0 sensor must be switched off shortly after start driving
@@ -31,7 +27,7 @@ test step 1, timeout 80 [s]:
 		// The other level sensors will be switched off when reaching the level
 	within 0 [s] .. T_END:
 		expect 4 transitions of CTRL_DI_FLOOR_LEVEL_1_SENSOR
-	within 10 [s] .. 20 [s]:
+	within 10 [s] .. T_END:
 		expect CTRL_DI_FLOOR_LEVEL_2_SENSOR => OFF
 
 	wait until T_END

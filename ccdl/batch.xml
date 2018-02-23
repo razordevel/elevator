@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<batch>
+	<root path="D:\git\master\elevator\ccdl\procedures"/>
+	<gammaPath path="D:\tmp"/>
+	<embrickConnection host="192.168.0.229" user="root"/>
+	<test name="relais_test"/>
+</batch>

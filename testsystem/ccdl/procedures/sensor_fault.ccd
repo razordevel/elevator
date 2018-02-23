@@ -2,26 +2,18 @@ ccd
 initial conditions:
 {
 	CTRL.initRelayMatrix ()
+
+	// Reset elevator to level 0
+	set CTRL_DO_RESET to ON for 200 [ms]
 	wait 1 [s]
-
-	// Drive elevator to level 0
-	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to ON
-	wait 500 [ms]
-	set CTRL_DO_FLOOR_LEVEL_0_BUTTON to OFF
-
-	wait until CTRL_AI_CABIN_MOTOR_SPEED_ENABLED < 10
-
-	// Wait for opening/closing of doors
-	wait 9 [s]
+	wait until CTRL_AI_ERROR_MODE = 0
 }
 
 test step 1:
 {
 
 	// Drive elevator to level 2
-	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON
-	after 500 [ms]:
-		set CTRL_DO_FLOOR_LEVEL_2_BUTTON to OFF
+	set CTRL_DO_FLOOR_LEVEL_2_BUTTON to ON for 200 [ms]
 		
 	set trigger FAILURE_INJECT after 4 [s]
 
