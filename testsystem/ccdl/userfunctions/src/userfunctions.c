@@ -35,6 +35,7 @@ long encoder_time = 0;
 long encoder_ticks = 0;
 long encoder_speed = 0;
 boolean encoder_overspeed = false;
+long encoder_step = 0;
 
 extern ccdl_te_parameterHandle _TDLP_DI_ROTARY_ENCODER_A;
 extern ccdl_te_parameterHandle _TDLP_DI_ROTARY_ENCODER_B;
@@ -127,48 +128,80 @@ static int readEncoderValue() {
 }
 
 
-static void transferEncoderInput(tdl_measureSpeed_t * data) {
-  // Encoder Input
-  int newValue = readEncoderValue();
-  long newTime = data->counter;
-
-  if (encoder_time == newTime) {
-    return;
+static int getStepIndex(int value)
+{
+  // Rount trip cycle is 0, 2, 3, 1
+  switch (value) {
+      case 2:
+          return 1;
+      case 3: 
+          return 2;
+      case 1: 
+          return 3;
+      case 0:
+      default:
+          return 0;
   }
-
-  if (newValue != encoder_value) {
-    boolean oldA = (encoder_value & 1) != 0;
-    boolean oldB = (encoder_value & 2) != 0;
-    boolean newA = (newValue & 1) != 0;
-    boolean newB = (newValue & 2) != 0;
-
-    if (oldA != newA && oldB != newB) {
-      encoder_overspeed = true;
-      encoder_value = newValue;
-      encoder_time = newTime;
-      encoder_ticks += 2;
-      encoder_speed = 0;
-      return;
+}
+    
+static int getInitialStep(int oldValue, int newValue)
+{
+        int oldStep = getStepIndex(oldValue);
+        int newStep = getStepIndex(newValue);
+        int step = newStep - oldStep;
+        if (step == 3) {
+            return -1;
+        }
+        if (step == -3) {
+            return 1;
+        }
+        return step;
     }
+    
+static int getFastStep(int oldValue, int newValue, int direction)
+{
+        int oldStep = getStepIndex(oldValue);
+        int newStep = getStepIndex(newValue);
+        int step = newStep - oldStep;
+        if (direction < 0 && step > 0) {
+            step -= 4;
+        }
+        if (direction > 0 && step < 0) {
+            step += 4;
+        }
+        return step;
+}
+ 
+ static void transferEncoderInput(tdl_measureSpeed_t * data)
+{
+	// Encoder Input
+	int newValue = readEncoderValue();
+	long newTime = data->counter;
 
-    encoder_overspeed = false;
-    encoder_ticks++;
+        if (encoder_time == newTime) {
+            return;
+        }
 
-    long timeDelta = newTime - encoder_time;
-    long t = ENCODER_RESOLUTION * timeDelta;
-    encoder_speed = REFERENCE_TURN * MILLI_PER_SECOND / t;
+        if (newValue != encoder_value) {
+            if (encoder_speed == 0) {
+                // Start into one direction
+                encoder_step = getInitialStep(encoder_value, newValue);
+            } else {
+                // Keep direction
+                encoder_step = getFastStep(encoder_value, newValue, encoder_step);
+            }
 
-    if ((encoder_value == 0 && newValue == 1) || (encoder_value == 1 && newValue == 3) ||
-        (encoder_value == 3 && newValue == 2) || (encoder_value == 2 && newValue == 0)) {
-      encoder_speed *= -1;
-    }
+            encoder_ticks += encoder_step;
 
-    encoder_time = newTime;
-    encoder_value = newValue;
-  } else if (newTime > encoder_time + STOP_TIME) {
-    encoder_overspeed = false;
-    encoder_value = newValue;
-    encoder_time = newTime;
-    encoder_speed = 0;
-  }
+            long timeDelta = newTime - encoder_time;
+            long t = ENCODER_RESOLUTION * timeDelta;
+            encoder_speed = encoder_step * REFERENCE_TURN * MILLI_PER_SECOND / t;
+
+            encoder_time = newTime;
+            encoder_value = newValue;
+        } else if (newTime > encoder_time + STOP_TIME) {
+            encoder_value = newValue;
+            encoder_time = newTime;
+            encoder_speed = 0;
+        }
 }

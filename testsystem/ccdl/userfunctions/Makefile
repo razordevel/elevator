@@ -1,4 +1,4 @@
-# Copyright 2010-2016 Razorcat Development GmbH
+# Copyright 2010-2017 Razorcat Development GmbH
 # Author: Martin Weber
 
 ##################################
@@ -54,19 +54,18 @@ trm_build_hook_is_ccdl_extension= $(lib_name)-tests/LDK/build_hooks/01Buildmacro
 
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
-	@echo -e "... configure \t\tGenerates additional files to be installed. (Run this first)"
+	@echo "... configure    Generates additional files to be installed. (Run this first)"
 	@echo
-	@echo -e "... lib   \t\tBuilds the custom CCDL extension library."
-	@echo -e "... tests \t\tBuilds the infrastructure to run the tests."
-	@echo -e "... run-tests \t\tCompiles all tests the same way the TRM-server would do."
-	@echo -e "\t\t\t (Make sure the file ccdconfig4tests/functions.txt contains the declarations"
-	@echo -e "\t\t\t of the functions provided by the library)"
-	@echo -e "... all \t\tSame as lib + run-tests."
-	@echo -e "... clean \t\tDeletes most of the generated files."
-	@echo -e "... mrproper \t\tDeletes all the generated files."
+	@echo "... lib          Builds the custom CCDL extension library."
+	@echo "... tests        Builds the infrastructure to run the tests."
+	@echo "... run-tests    Compiles all tests the same way the TRM-server would do."
+	@echo "                  (Make sure the file ccdconfig4tests/functions.txt contains the"
+	@echo "                  declarations of the functions provided by the library)"
+	@echo "... all          Same as lib + run-tests."
+	@echo "... clean        Deletes most of the generated files."
+	@echo "... mrproper     Deletes all generated files."
 	@echo
-	@echo -e "... install \t\tCopies the files to $(TARGET_INSTALL_PATH)."
-#	@echo -e "\n$(MAKEFILE_LIST)"
+	@echo "... install      Copies the files to $(TARGET_INSTALL_PATH)."
 
 
 .PHONY: configure
@@ -75,7 +74,9 @@ configure: $(trm_build_hook)
 all: lib run-tests
 
 lib: $(lib_file)
-	@echo -e "\n+++ CCDL extension library '$(lib_name)' build successfully\n"
+	@echo
+	@echo "+++ CCDL extension library '$(lib_name)' build successfully"
+	@echo
 
 clean:
 	-rm -f $(lib_file) $(lib_objects)
@@ -92,23 +93,23 @@ install:
 	install -vp $(basedir)src/userfunctions.h $(DESTDIR)$(TARGET_INSTALL_PATH)/include
 	install -d $(DESTDIR)/opt/razorcat/ccd3/libdef
 	install -vp $(trm_build_hook) $(DESTDIR)/opt/razorcat/ccd3/libdef/$(trm_build_hook)
-# 	@echo -e "\n+++ Library installed successfully\n"
 
 # creates Makefile include to hook in to the Test Run Management build
 $(trm_build_hook): $(MAKEFILE_LIST)
-	@echo -e "# Generated from template for $(lib_name)! EDIT AS NEEDED!\n" > $@
+	@echo "# Generated from template for $(lib_name)! EDIT AS NEEDED!" > $@
+	@echo "" >> $@
 	@echo "# Makefile include to hook in library $(lib_name)" >> $@
-	@echo "# to the Test Run Management System's build process" >> $@
+	@echo "# to the Test Run Management's build process" >> $@
 	@echo 'ifeq ($(EXECTARGET), $$(TRM.TARGET))' >> $@
 	@echo "" >> $@
 	@echo "dbg::" >> $@
-	@echo -e '\t@echo "+++ CCDL extensions from '$(lib_name)' enabled"' >> $@
+	@echo '	@echo "+++ CCDL extensions from '$(lib_name)' enabled"' >> $@
 	@echo "" >> $@
 	@echo "# tell C-Compiler to include file userfunctions.h" >> $@
-	@echo -e "Cpp_defines.local+= INCLUDE_USERFUNCTIONS\n" >> $@
-	@echo -e "Includepath.local+= $(DESTDIR)$(TARGET_INSTALL_PATH)/include $(third_party_lib_headers)\n" >> $@
-	@echo -e "Libpath.local+= $(DESTDIR)$(TARGET_INSTALL_PATH)/lib\n" >> $@
-	@echo -e "Libs.local+= $(lib_name) $(third_party_libs)\n" >> $@
+	@echo "Cpp_defines.local+= INCLUDE_USERFUNCTIONS\n" >> $@
+	@echo "Includepath.local+= $(DESTDIR)$(TARGET_INSTALL_PATH)/include $(third_party_lib_headers)" >> $@
+	@echo "Libpath.local+= $(DESTDIR)$(TARGET_INSTALL_PATH)/lib" >> $@
+	@echo "Libs.local+= $(lib_name) $(third_party_libs)" >> $@
 	@echo 'endif #($(EXECTARGET), $$(TRM.TARGET))' >> $@
 	@echo "+++ Generated $@. PLEASE EDIT THE FILE AS NEEDED!"
 
@@ -130,17 +131,20 @@ $(lib_name)-tests/%: $(basedir)tests/% $(lib_name)-tests $(trm_build_hook_is_ccd
 # tells LDK that whe are a ccdl extension lib
 $(trm_build_hook_is_ccdl_extension): $(MAKEFILE_LIST)
 	@echo "# Tell LDK we are a ccdl extension lib" > $@
-	@echo -e "# Generated on $$(date -u) by $(MAKEFILE_LIST)\n" >> $@
-	@echo -e "Cpp_defines.local+= INCLUDE_USERFUNCTIONS\n" >> $@
-	@echo -e "CCDC_FLAGS=-C $(basedir)ccdconfig4tests\n" >> $@
+	@echo "# Generated on $$(date -u) by $(MAKEFILE_LIST)" >> $@
+	@echo "Cpp_defines.local+= INCLUDE_USERFUNCTIONS" >> $@
+	@echo "CCDC_FLAGS=-C $(basedir)ccdconfig4tests" >> $@
 #	@echo 'TRM.TARGET= $(EXECTARGET)' >> $@
 
 run-tests: $(addprefix run-,$(notdir $(testing_sources)))
-	@echo -e "\n+++ Finished tests.\n"
+	@echo
+	@echo "+++ Finished tests."
+	@echo
 
 # test the library (build it like TRM does)
 run-%: $(lib_name)-tests/%
-	@echo -e "+++ Running test '$*'...\n"
+	@echo "+++ Running test '$*'..."
+	@echo
 	$(MAKE) -C $< TRM.TARGET=$(EXECTARGET)
 
 

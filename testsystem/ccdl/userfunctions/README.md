@@ -27,4 +27,7 @@
 1. Run 'make lib' to build your library.
 2. Run 'make install DESTDIR=/tmp' to test the installation process.
 
-Consider building an rpm package instead of installing the library with 'make install'!
+## Installing the library as root
+
+1. Consider building an rpm package instead of installing the library with 'make install'!
+2. Run 'sudo make install' to install.
