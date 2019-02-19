@@ -2,7 +2,9 @@
 <configuration version="3.0">
  <environments>
   <compiler name="GNU GCC">
-   <properties/>
+   <properties>
+    <property type="Boolean" name="Generate Defines" value="false" flags="0x05"/>
+   </properties>
    <target name="GNU GVD">
     <properties/>
     <environment name="(Default)">
