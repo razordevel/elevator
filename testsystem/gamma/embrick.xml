@@ -1,0 +1,147 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<embrickModules>
+<!-- Notes:
+     - Attention on using OutX and OutAll of a single module:
+       OutX and OutAll are mapped to the same memory of the module and they are
+       not synchronized. Writing one of the value overwrites the other value.
+       Please use OutX or OutAll to avoid problems.
+     - Obtaining current modules:
+       IOs of current connected emBRICK modules can be obtained by calling the
+       Gamma IO library with gaIOChecker:
+       # gaIOChecker -i gaioEmbrickEasyAPI -p "-i imacsEasyAPIBeagleBone -x embrick.xml -n 1 -t 10000" -x ios.xml
+-->
+
+    <module name="2RelNo4RelCo" id="2301">
+        <!-- NO INPUTS (Data to master) -->
+
+        <!-- OUTPUTS (Data from master) -->
+        <!-- Disabled, because of ambiguous behavior See above.
+        <output name="OutAll" bitOffset="0" bitSize="6" type="uint8" />
+         -->
+        <output name="Out0" bitOffset="0" bitSize="1" type="uint8" />
+        <output name="Out1" bitOffset="1" bitSize="1" type="uint8" />
+        <output name="Out2" bitOffset="2" bitSize="1" type="uint8" />
+        <output name="Out3" bitOffset="3" bitSize="1" type="uint8" />
+        <output name="Out4" bitOffset="4" bitSize="1" type="uint8" />
+        <output name="Out5" bitOffset="5" bitSize="1" type="uint8" />
+    </module>
+
+    <module name="5Ai3Imp" id="2451">
+        <!-- INPUTS (Data to master) -->
+        <input name="AIn0" bitOffset="0" bitSize="16" type="uint16" />
+        <input name="AIn1" bitOffset="16" bitSize="16" type="uint16" />
+        <input name="AIn2" bitOffset="32" bitSize="16" type="uint16" />
+        <input name="AIn3" bitOffset="48" bitSize="16" type="uint16" />
+        <input name="AIn4" bitOffset="64" bitSize="16" type="uint16" />
+        
+        <input name="PIn0TR" bitOffset="80" bitSize="2" type="uint8" />
+        <input name="PIn0Sum" bitOffset="82" bitSize="14" type="uint16" />
+        <input name="PIn0Diff" bitOffset="96" bitSize="16" type="uint16" />
+        <input name="PIn1TR" bitOffset="112" bitSize="2" type="uint8" />
+        <input name="PIn1Sum" bitOffset="114" bitSize="14" type="uint16" />
+        <input name="PIn1Diff" bitOffset="128" bitSize="16" type="uint16" />
+        <input name="PIn2TR" bitOffset="144" bitSize="2" type="uint8" />
+        <input name="PIn2Sum" bitOffset="146" bitSize="14" type="uint16" />
+        <input name="PIn2Diff" bitOffset="160" bitSize="16" type="uint16" />
+
+        <!-- OUTPUTS (Data from master) -->
+        <output name="PIn0Period" bitOffset="80" bitSize="6" type="uint8" />
+        <output name="PIn0FilterPeriod" bitOffset="86" bitSize="10" type="uint16" />
+        <output name="PIn0Attr" bitOffset="96" bitSize="16" type="uint16" />
+        <output name="PIn1Period" bitOffset="112" bitSize="6" type="uint8" />
+        <output name="PIn1FilterPeriod" bitOffset="118" bitSize="10" type="uint16" />
+        <output name="PIn1Attr" bitOffset="128" bitSize="16" type="uint16" />
+        <output name="PIn2Period" bitOffset="144" bitSize="6" type="uint8" />
+        <output name="PIn2FilterPeriod" bitOffset="150" bitSize="10" type="uint16" />
+        <output name="PIn2Attr" bitOffset="160" bitSize="16" type="uint16" />
+    </module>
+
+    <module name="5Ai3Imp_" id="2453">
+        <!-- INPUTS (Data to master) -->
+        <input name="AIn0" bitOffset="0" bitSize="16" type="uint16" />
+        <input name="AIn1" bitOffset="16" bitSize="16" type="uint16" />
+        <input name="AIn2" bitOffset="32" bitSize="16" type="uint16" />
+        <input name="AIn3" bitOffset="48" bitSize="16" type="uint16" />
+        <input name="AIn4" bitOffset="64" bitSize="16" type="uint16" />
+        
+        <input name="PIn0TR" bitOffset="80" bitSize="2" type="uint8" />
+        <input name="PIn0Sum" bitOffset="82" bitSize="14" type="uint16" />
+        <input name="PIn0Diff" bitOffset="96" bitSize="16" type="uint16" />
+        <input name="PIn1TR" bitOffset="112" bitSize="2" type="uint8" />
+        <input name="PIn1Sum" bitOffset="114" bitSize="14" type="uint16" />
+        <input name="PIn1Diff" bitOffset="128" bitSize="16" type="uint16" />
+        <input name="PIn2TR" bitOffset="144" bitSize="2" type="uint8" />
+        <input name="PIn2Sum" bitOffset="146" bitSize="14" type="uint16" />
+        <input name="PIn2Diff" bitOffset="160" bitSize="16" type="uint16" />
+
+        <!-- OUTPUTS (Data from master) -->
+        <output name="PIn0Period" bitOffset="80" bitSize="6" type="uint8" />
+        <output name="PIn0FilterPeriod" bitOffset="86" bitSize="10" type="uint16" />
+        <output name="PIn0Attr" bitOffset="96" bitSize="16" type="uint16" />
+        <output name="PIn1Period" bitOffset="112" bitSize="6" type="uint8" />
+        <output name="PIn1FilterPeriod" bitOffset="118" bitSize="10" type="uint16" />
+        <output name="PIn1Attr" bitOffset="128" bitSize="16" type="uint16" />
+        <output name="PIn2Period" bitOffset="144" bitSize="6" type="uint8" />
+        <output name="PIn2FilterPeriod" bitOffset="150" bitSize="10" type="uint16" />
+        <output name="PIn2Attr" bitOffset="160" bitSize="16" type="uint16" />
+    </module>
+
+    <module name="8Temp" id="4401">
+        <!-- INPUTS (Data to master) -->
+        <input name="T0" bitOffset="0" bitSize="16" type="uint16" />
+        <input name="T1" bitOffset="16" bitSize="16" type="uint16" />
+        <input name="T2" bitOffset="32" bitSize="16" type="uint16" />
+        <input name="T3" bitOffset="48" bitSize="16" type="uint16" />
+        <input name="T4" bitOffset="64" bitSize="16" type="uint16" />
+        <input name="T5" bitOffset="80" bitSize="16" type="uint16" />
+        <input name="T6" bitOffset="96" bitSize="16" type="uint16" />
+        <input name="T7" bitOffset="112" bitSize="16" type="uint16" />
+
+        <!-- NO OUTPUTS (Data from master) -->
+    </module>
+
+    <module name="8DI8DO" id="2181">
+        <!-- INPUTS (Data to master) -->
+        <input name="InAll" bitOffset="0" bitSize="8" type="uint8" />
+        <input name="In0" bitOffset="0" bitSize="1" type="uint8" />
+        <input name="In1" bitOffset="1" bitSize="1" type="uint8" />
+        <input name="In2" bitOffset="2" bitSize="1" type="uint8" />
+        <input name="In3" bitOffset="3" bitSize="1" type="uint8" />
+        <input name="In4" bitOffset="4" bitSize="1" type="uint8" />
+        <input name="In5" bitOffset="5" bitSize="1" type="uint8" />
+        <input name="In6" bitOffset="6" bitSize="1" type="uint8" />
+        <input name="In7" bitOffset="7" bitSize="1" type="uint8" />
+
+        <!-- OUTPUTS (Data from master) -->
+        <!-- Disabled, because of ambiguous behavior See above.
+        <output name="OutAll" bitOffset="0" bitSize="8" type="uint8" />
+         -->
+        <output name="Out0" bitOffset="0" bitSize="1" type="uint8" />
+        <output name="Out1" bitOffset="1" bitSize="1" type="uint8" />
+        <output name="Out2" bitOffset="2" bitSize="1" type="uint8" />
+        <output name="Out3" bitOffset="3" bitSize="1" type="uint8" />
+        <output name="Out4" bitOffset="4" bitSize="1" type="uint8" />
+        <output name="Out5" bitOffset="5" bitSize="1" type="uint8" />
+        <output name="Out6" bitOffset="6" bitSize="1" type="uint8" />
+        <output name="Out7" bitOffset="7" bitSize="1" type="uint8" />
+    </module>
+
+    <module name="2Rel4Di2Ai" id="5131">
+        <!-- NO INPUTS (Data to master) -->
+        <input name="AIn0" bitOffset="0" bitSize="16" type="uint16" />
+        <input name="AIn1" bitOffset="16" bitSize="16" type="uint16" />
+        <input name="DInAll" bitOffset="32" bitSize="4" type="uint8" />
+        <input name="DIn0" bitOffset="32" bitSize="1" type="uint8" />
+        <input name="DIn1" bitOffset="33" bitSize="1" type="uint8" />
+        <input name="DIn2" bitOffset="34" bitSize="1" type="uint8" />
+        <input name="DIn3" bitOffset="35" bitSize="1" type="uint8" />
+
+        <!-- OUTPUTS (Data from master) -->
+        <!-- Disabled, because of ambiguous behavior See above.
+        <output name="OutAll" bitOffset="0" bitSize="2" type="uint8" />
+         -->
+        <output name="Out0" bitOffset="0" bitSize="1" type="uint8" />
+        <output name="Out1" bitOffset="1" bitSize="1" type="uint8" />
+    </module>
+
+</embrickModules>

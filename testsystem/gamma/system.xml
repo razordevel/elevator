@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gamma:system xmlns="http://www.rst-automation.de/gamma"
+  xmlns:gamma="http://www.rst-automation.de/gammaSystem" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:ccd="http://www.razorcat.com/ns/ccdl3/parameter" name="SystemLocal">
+
+  <!-- Template for use with Razorcat CEV on emBRICKS -->
+  <time>
+    <scheduler name="Scheduler" cycleTicks="1" initTimeoutUsec="100000000"
+      cleanupTimeoutUsec="1000000" expectedMinDurationUsec="0"
+      expectedMaxDurationUsec="4000" abortOnNumUnderruns="0" abortOnNumOverruns="0">
+
+      <!--
+        Slot to copy output values from data model to emBRICK plugin.
+      -->
+      <slot name="emBRICK_Output" initTimeoutUsec="10000000"
+        cleanupTimeoutUsec="1000000" expectedMinDurationUsec="0"
+        expectedMaxDurationUsec="300" abortOnNumUnderruns="0"
+        abortOnNumOverruns="0">
+
+        <next name="emBRICK_Update" />
+      </slot>
+
+      <!--
+        Slot to exchange data on the emBRICK bus.
+      -->
+      <slot name="emBRICK_Update" initTimeoutUsec="10000000"
+        cleanupTimeoutUsec="1000000" expectedMinDurationUsec="0"
+        expectedMaxDurationUsec="400" abortOnNumUnderruns="0"
+        abortOnNumOverruns="0">
+
+        <next name="emBRICK_Input" />
+      </slot>
+
+      <!--
+        Slot to copy input values from emBRICK plugin to data model.
+      -->
+      <slot name="emBRICK_Input" initTimeoutUsec="10000000"
+        cleanupTimeoutUsec="1000000" expectedMinDurationUsec="0"
+        expectedMaxDurationUsec="300" abortOnNumUnderruns="0"
+        abortOnNumOverruns="0">
+
+        <next name="testdriver" />
+      </slot>
+
+      <!-- this is the slot reserved for the test-driver process. The test-driver
+        gets
+        build from the source code supplied by the end-user of the Test Run Management. -->
+      <!-- You may adjust everything here to your own needs, except the slot name -->
+      <slot name="testdriver" initTimeoutUsec="100000000"
+        cleanupTimeoutUsec="1000000" expectedMinDurationUsec="0"
+        expectedMaxDurationUsec="2000" abortOnNumUnderruns="0"
+        abortOnNumOverruns="0">
+        <next name="Logging" />
+      </slot>
+
+      <!--
+        Logging slot for the logging. This slot will be run within the
+        gaservice to perform the serialization of the logging data.
+        The data will be sent to the 'gaDataLogger' process. Which must
+        be run locally or remote.
+      -->
+      <slot name="Logging" initTimeoutUsec="10000000" cleanupTimeoutUsec="1000000"
+        expectedMinDurationUsec="0" expectedMaxDurationUsec="400"
+        abortOnNumUnderruns="0" abortOnNumOverruns="0" />
+
+    </scheduler>
+  </time>
+
+  <data>
+    <action name="Action_Logging" />
+    <action name="Action_emBRICK_Input" />
+    <action name="Action_emBRICK_Output" />
+
+    <node name="Node" logging="enabled">
+      <memory name="Memory" size="64000" xsi:type="shm">
+        <!-- This group of variables is required by the Check Case Definition runtime
+          library. See mappings in file /etc/ccd2c/ccd2c.conf -->
+        <group name="CCDL" loggingAction="Action_Logging" ioSimulation="disabled"
+          getSimulation="disabled" putSimulation="disabled">
+          <variable name="TestStep" type="uint64" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+          <variable name="LineNumber" type="uint16" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+          <variable name="TraceBits" type="uint64" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+          <variable name="EvalBits" type="uint64" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+        </group>
+
+        <!-- This group of variables represents the System Under Test. Adjust this
+          to
+          suite your needs... -->
+        <group name="SUT" loggingAction="Action_Logging" ioSimulation="disabled"
+          getSimulation="disabled" putSimulation="disabled">
+          <variable name="tmp_a" type="ieee64" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+          <variable name="tmp_b" type="ieee32" dimension="1"
+            addConvenienceAlias="false">
+            <value>505</value>
+          </variable>
+          <variable name="TMP_MEASURE_POINT" type="ieee32" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+          <variable name="CALC_ENCODER_SPEED" type="ieee32" dimension="1"
+            addConvenienceAlias="false">
+            <value>0</value>
+          </variable>
+        </group>
+      </memory>
+    </node>
+
+    <!-- Unfortunately, we have to add an alias for each SUT's PV.. -->
+    <alias name="tmp_a" target="Node.Memory.SUT.tmp_a" ccd:unit="s" />
+    <alias name="tmp_b" target="Node.Memory.SUT.tmp_b" />
+    <alias name="TMP_MEASURE_POINT" target="Node.Memory.SUT.TMP_MEASURE_POINT" />
+    <alias name="CALC_ENCODER_SPEED" target="Node.Memory.SUT.CALC_ENCODER_SPEED" />
+
+
+    <node name="Embrick" logging="enabled" minimum="disabled" maximum="disabled">
+      <memory name="Memory" size="64000" xsi:type="shm">
+      <!-- 
+       -->
+        <group name="Group" isLocked="false" loggingAction="Action_Logging"
+          ioSimulation="disabled" getSimulation="disabled" putSimulation="disabled"
+          >
+          <array name="Module_2RelNo4RelCo_0">
+            <variable name="Out0" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="Out1" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="Out2" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="Out3" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="Out4" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="Out5" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+          </array>
+          <array name="Module_2Rel4Di2Ai_0">
+            <variable name="DI_0" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DI_1" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DI_2" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DI_3" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="AI_0" type="uint16" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="AI_1" type="uint16" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DO_0" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DO_1" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+          </array>
+          <array name="Module_2Rel4Di2Ai_1">
+            <variable name="DI_0" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DI_1" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DI_2" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DI_3" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="AI_0" type="uint16" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="AI_1" type="uint16" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DO_0" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+            <variable name="DO_1" type="uint8" dimension="1">
+              <value>0</value>
+            </variable>
+          </array>
+          <array name="Module_5Ai3Imp_0">
+            <variable name="AI_0" type="uint16" dimension="1">
+              <value>0</value>
+            </variable>
+          </array>
+        </group>
+      </memory>
+    </node>
+
+    <alias name="CTRL_DO_FLOOR_LEVEL_0_BUTTON" target="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out0" />
+    <alias name="CTRL_DO_FLOOR_LEVEL_1_BUTTON" target="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out1" />
+    <alias name="CTRL_DO_FLOOR_LEVEL_2_BUTTON" target="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out2" />
+    <alias name="FLOOR_LEVEL_0_SENSOR_PIN" target="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out3" />
+    <alias name="FLOOR_LEVEL_1_SENSOR_PIN" target="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out4" />
+    <alias name="FLOOR_LEVEL_2_SENSOR_PIN" target="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out5" />
+
+    <alias name="DO_ROTARY_ENCODER_A" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DO_0" />
+    <alias name="DO_ROTARY_ENCODER_B" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DO_1" />
+
+    <alias name="CTRL_DI_FLOOR_LEVEL_0_SENSOR" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_0" />
+    <alias name="CTRL_DI_FLOOR_LEVEL_1_SENSOR" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_1" />
+    <alias name="CTRL_DI_FLOOR_LEVEL_2_SENSOR" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_2" />
+    <alias name="DI_ROTARY_ENCODER_A" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_3" />
+
+    <alias name="CTRL_AI_CABIN_MOTOR_SPEED_UP" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.AI_0" />
+    <alias name="CTRL_AI_CABIN_MOTOR_SPEED_DOWN" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.AI_1" />
+
+    <alias name="CTRL_DO_RESET" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DO_0" />
+    <alias name="CTRL_DO_TEMPERATURE_OFFSET" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DO_1" />
+
+    <alias name="CTRL_DI_FLOOR_LEVEL_0_LIGHT" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_0" />
+    <alias name="CTRL_DI_FLOOR_LEVEL_1_LIGHT" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_1" />
+    <alias name="CTRL_DI_FLOOR_LEVEL_2_LIGHT" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_2" />
+    <alias name="DI_ROTARY_ENCODER_B" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_3" />
+
+    <alias name="CTRL_AI_CABIN_MOTOR_SPEED_ENABLED" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.AI_0" />
+    <alias name="CTRL_AI_MOTOR_TEMPERATURE" target="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.AI_1" />
+
+    <alias name="CTRL_AI_ERROR_MODE" target="Embrick.Memory.Group.Module_5Ai3Imp_0.AI_0" />
+  </data>
+
+  <actionMap>
+    <map xsi:type="schedulerMapping" action="Action_Logging" scheduler="Scheduler"
+      slot="Logging" />
+    <map xsi:type="schedulerMapping" action="Action_emBRICK_Input" scheduler="Scheduler"
+      slot="emBRICK_Input" />
+    <map xsi:type="schedulerMapping" action="Action_emBRICK_Output" scheduler="Scheduler"
+      slot="emBRICK_Output" />
+  </actionMap>
+  <ioModel>
+    <io name="EmbrickEasyAPI">
+      <plugin vendor="RST" version="1">
+        <library>gaioEmbrickEasyAPI</library>
+        <parameters>-i embrickStackLocalMasterBBB -x setup/embrick.xml -n 1 -t 10000</parameters>
+      </plugin>
+
+        <output channel="2RelNo4RelCo_0.OutAll" type="uint8" description="2RelNo4RelCo_0.OutAll"/>
+        <output channel="2RelNo4RelCo_0.Out0" type="uint8" description="2RelNo4RelCo_0.Out0"/>
+        <output channel="2RelNo4RelCo_0.Out1" type="uint8" description="2RelNo4RelCo_0.Out1"/>
+        <output channel="2RelNo4RelCo_0.Out2" type="uint8" description="2RelNo4RelCo_0.Out2"/>
+        <output channel="2RelNo4RelCo_0.Out3" type="uint8" description="2RelNo4RelCo_0.Out3"/>
+        <output channel="2RelNo4RelCo_0.Out4" type="uint8" description="2RelNo4RelCo_0.Out4"/>
+        <output channel="2RelNo4RelCo_0.Out5" type="uint8" description="2RelNo4RelCo_0.Out5"/>
+
+      <input channel="2Rel4Di2Ai_0.AIn0" type="uint16" description="2Rel4Di2Ai_0.AIn0" />
+      <input channel="2Rel4Di2Ai_0.AIn1" type="uint16" description="2Rel4Di2Ai_0.AIn1" />
+
+      <input channel="2Rel4Di2Ai_0.DIn0" type="uint8" description="2Rel4Di2Ai_0.DIn0" />
+      <input channel="2Rel4Di2Ai_0.DIn1" type="uint8" description="2Rel4Di2Ai_0.DIn1" />
+      <input channel="2Rel4Di2Ai_0.DIn2" type="uint8" description="2Rel4Di2Ai_0.DIn2" />
+      <input channel="2Rel4Di2Ai_0.DIn3" type="uint8" description="2Rel4Di2Ai_0.DIn3" />
+
+      <output channel="2Rel4Di2Ai_0.Out0" type="uint8" description="2Rel4Di2Ai_0.Out0" />
+      <output channel="2Rel4Di2Ai_0.Out1" type="uint8" description="2Rel4Di2Ai_0.Out1" />
+
+      <input channel="2Rel4Di2Ai_1.AIn0" type="uint16" description="2Rel4Di2Ai_0.AIn0" />
+      <input channel="2Rel4Di2Ai_1.AIn1" type="uint16" description="2Rel4Di2Ai_0.AIn1" />
+
+      <input channel="2Rel4Di2Ai_1.DIn0" type="uint8" description="2Rel4Di2Ai_0.DIn0" />
+      <input channel="2Rel4Di2Ai_1.DIn1" type="uint8" description="2Rel4Di2Ai_0.DIn1" />
+      <input channel="2Rel4Di2Ai_1.DIn2" type="uint8" description="2Rel4Di2Ai_0.DIn2" />
+      <input channel="2Rel4Di2Ai_1.DIn3" type="uint8" description="2Rel4Di2Ai_0.DIn3" />
+
+      <output channel="2Rel4Di2Ai_1.Out0" type="uint8" description="2Rel4Di2Ai_0.Out0" />
+      <output channel="2Rel4Di2Ai_1.Out1" type="uint8" description="2Rel4Di2Ai_0.Out1" />
+
+
+      <input channel="5Ai3Imp_0.AIn0" type="uint16" description="5Ai3Imp_0.AIn0" />
+
+      <!--
+        <input channel="8Temp_0.T0" type="uint16" description="8Temp_0.T0"/>
+        <input channel="8Temp_0.T1" type="uint16" description="8Temp_0.T1"/>
+        <input channel="8Temp_0.T2" type="uint16" description="8Temp_0.T2"/>
+        <input channel="8Temp_0.T3" type="uint16" description="8Temp_0.T3"/>
+        <input channel="8Temp_0.T4" type="uint16" description="8Temp_0.T4"/>
+        <input channel="8Temp_0.T5" type="uint16" description="8Temp_0.T5"/>
+        <input channel="8Temp_0.T6" type="uint16" description="8Temp_0.T6"/>
+        <input channel="8Temp_0.T7" type="uint16" description="8Temp_0.T7"/>
+
+        <input channel="8DI8DO_0.InAll" type="uint8" description="8DI8DO_0.InAll"/>
+        <input channel="8DI8DO_0.In0" type="uint8" description="8DI8DO_0.In0"/>
+        <input channel="8DI8DO_0.In1" type="uint8" description="8DI8DO_0.In1"/>
+        <input channel="8DI8DO_0.In2" type="uint8" description="8DI8DO_0.In2"/>
+        <input channel="8DI8DO_0.In3" type="uint8" description="8DI8DO_0.In3"/>
+        <input channel="8DI8DO_0.In4" type="uint8" description="8DI8DO_0.In4"/>
+        <input channel="8DI8DO_0.In5" type="uint8" description="8DI8DO_0.In5"/>
+        <input channel="8DI8DO_0.In6" type="uint8" description="8DI8DO_0.In6"/>
+        <input channel="8DI8DO_0.In7" type="uint8" description="8DI8DO_0.In7"/>
+
+        <output channel="8DI8DO_0.OutAll" type="uint8" description="8DI8DO_0.OutAll"/>
+        <output channel="8DI8DO_0.Out0" type="uint8" description="8DI8DO_0.Out0"/>
+        <output channel="8DI8DO_0.Out1" type="uint8" description="8DI8DO_0.Out1"/>
+        <output channel="8DI8DO_0.Out2" type="uint8" description="8DI8DO_0.Out2"/>
+        <output channel="8DI8DO_0.Out3" type="uint8" description="8DI8DO_0.Out3"/>
+        <output channel="8DI8DO_0.Out4" type="uint8" description="8DI8DO_0.Out4"/>
+        <output channel="8DI8DO_0.Out5" type="uint8" description="8DI8DO_0.Out5"/>
+        <output channel="8DI8DO_0.Out6" type="uint8" description="8DI8DO_0.Out6"/>
+        <output channel="8DI8DO_0.Out7" type="uint8" description="8DI8DO_0.Out7"/>
+
+        <input channel="8DI8DO_1.InAll" type="uint8" description="8DI8DO_1.InAll"/>
+        <input channel="8DI8DO_1.In0" type="uint8" description="8DI8DO_1.In0"/>
+        <input channel="8DI8DO_1.In1" type="uint8" description="8DI8DO_1.In1"/>
+        <input channel="8DI8DO_1.In2" type="uint8" description="8DI8DO_1.In2"/>
+        <input channel="8DI8DO_1.In3" type="uint8" description="8DI8DO_1.In3"/>
+        <input channel="8DI8DO_1.In4" type="uint8" description="8DI8DO_1.In4"/>
+        <input channel="8DI8DO_1.In5" type="uint8" description="8DI8DO_1.In5"/>
+        <input channel="8DI8DO_1.In6" type="uint8" description="8DI8DO_1.In6"/>
+        <input channel="8DI8DO_1.In7" type="uint8" description="8DI8DO_1.In7"/>
+
+        <output channel="8DI8DO_1.OutAll" type="uint8" description="8DI8DO_1.OutAll"/>
+        <output channel="8DI8DO_1.Out0" type="uint8" description="8DI8DO_1.Out0"/>
+        <output channel="8DI8DO_1.Out1" type="uint8" description="8DI8DO_1.Out1"/>
+        <output channel="8DI8DO_1.Out2" type="uint8" description="8DI8DO_1.Out2"/>
+        <output channel="8DI8DO_1.Out3" type="uint8" description="8DI8DO_1.Out3"/>
+        <output channel="8DI8DO_1.Out4" type="uint8" description="8DI8DO_1.Out4"/>
+        <output channel="8DI8DO_1.Out5" type="uint8" description="8DI8DO_1.Out5"/>
+        <output channel="8DI8DO_1.Out6" type="uint8" description="8DI8DO_1.Out6"/>
+        <output channel="8DI8DO_1.Out7" type="uint8" description="8DI8DO_1.Out7"/>
+      -->
+    </io>
+  </ioModel>
+  <ioMap>
+    <map xsi:type="gamma:schedulerMapping" io="EmbrickEasyAPI" scheduler='Scheduler'
+      slot="emBRICK_Update" />
+
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.DIn0"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_0" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.DIn1"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_1" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.DIn2"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_2" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.DIn3"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DI_3" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.AIn0"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.AI_0" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.AIn1"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.AI_1" />
+
+    <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.Out0"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DO_0" />
+    <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_0.Out1"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_0.DO_1" />
+
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.DIn0"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_0" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.DIn1"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_1" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.DIn2"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_2" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.DIn3"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DI_3" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.AIn0"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.AI_0" />
+    <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.AIn1"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.AI_1" />
+
+    <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.Out0"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DO_0" />
+    <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2Rel4Di2Ai_1.Out1"
+      alias="Embrick.Memory.Group.Module_2Rel4Di2Ai_1.DO_1" />
+
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2RelNo4RelCo_0.Out0"
+      alias="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out0" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2RelNo4RelCo_0.Out1"
+      alias="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out1" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2RelNo4RelCo_0.Out2"
+      alias="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out2" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2RelNo4RelCo_0.Out3"
+      alias="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out3" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2RelNo4RelCo_0.Out4"
+      alias="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out4" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="2RelNo4RelCo_0.Out5"
+      alias="Embrick.Memory.Group.Module_2RelNo4RelCo_0.Out5" />
+
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="5Ai3Imp_0.AIn0"
+      alias="Embrick.Memory.Group.Module_5Ai3Imp_0.AI_0" />
+
+    <!--
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In0"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[0]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In1"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[1]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In2"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[2]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In3"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[3]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In4"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[4]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In5"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[5]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In6"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[6]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.In7"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DI[7]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_0.InAll"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DIAll" />
+
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out0"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[0]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out1"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[1]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out2"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[2]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out3"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[3]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out4"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[4]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out5"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[5]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out6"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[6]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.Out7"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DO[7]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_0.OutAll"
+      alias="Embrick.Memory.Group.Module_8DI8DO_0.DOAll" />
+
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In0"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[0]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In1"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[1]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In2"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[2]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In3"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[3]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In4"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[4]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In5"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[5]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In6"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[6]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.In7"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DI[7]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8DI8DO_1.InAll"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DIAll" />
+
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out0"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[0]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out1"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[1]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out2"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[2]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out3"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[3]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out4"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[4]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out5"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[5]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out6"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[6]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.Out7"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DO[7]" />
+      <output action="Action_emBRICK_Output" io="EmbrickEasyAPI" channel="8DI8DO_1.OutAll"
+      alias="Embrick.Memory.Group.Module_8DI8DO_1.DOAll" />
+
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T0"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[0]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T1"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[1]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T2"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[2]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T3"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[3]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T4"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[4]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T5"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[5]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T6"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[6]" />
+      <input action="Action_emBRICK_Input" io="EmbrickEasyAPI" channel="8Temp_0.T7"
+      alias="Embrick.Memory.Group.Module_8Temp_0.T[7]" />
+    -->
+  </ioMap>
+
+</gamma:system>
+

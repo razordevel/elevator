@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://www.rst-automation.de" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.rst-automation.de config.xsd" name="Service"
+  version="0.0.1">
+
+  <property name="ClockPrecisionUsec">4000</property>
+
+  <section name="Network">
+    <property name="NetworkImplementation">none</property>
+  </section>
+
+  <section name="DataLogging">
+    <property name="PluginName">gaLoggingDefaultPlugin</property>
+    <section name="Config">
+    <!-- 
+      <property name="BufferSize">8388608</property>
+     -->
+      <property name="BufferSize">1048576</property>
+      <property name="ListenPort">12345</property>
+    </section>
+  </section>
+
+</config>
