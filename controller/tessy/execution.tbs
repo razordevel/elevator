@@ -20,7 +20,7 @@
         <operation key="generateBatchReport">
             <options>
                 <option key="reportOutputDirectory" value="$(PROJECTROOT)\report"/>
-                <option key="reportFileNamePattern" value="TESSY_OverviewReport_$(DATETIME)"/>
+                <option key="reportFileNamePattern" value="TESSY_OverviewReport"/>
                 <option key="reportOutputFormat" value="pdf"/>
             </options>
             <arguments>
@@ -39,33 +39,6 @@
                 <argument name="OPT_INCLUDE_REPORT_COMMENTS" value="true"/>
                 <argument name="OPT_ONE_DOCUMENT" value="false"/>
                 <argument name="OPT_SHOW_NOTES" value="true"/>
-            </arguments>
-        </operation>
-        <operation key="generateTestReport">
-            <options>
-                <option key="reportOutputDirectory" value="$(PROJECTROOT)\report"/>
-                <option key="reportFileNamePattern" value="TESSY_DetailsReport_$(TESTOBJECT)_$(DATETIME)"/>
-                <option key="reportOutputFormat" value="pdf"/>
-            </options>
-            <arguments>
-                <argument name="OPT_TESTDATA_ONLY_MODE" value="false"/>
-                <argument name="OPT_SHOW_PROPERTIES" value="true"/>
-                <argument name="OPT_SHOW_USER_AND_HOST" value="false"/>
-                <argument name="OPT_SHOW_COVERAGE" value="true"/>
-                <argument name="OPT_SHOW_METRICS" value="true"/>
-                <argument name="OPT_SHOW_ATTRIBUTES" value="true"/>
-                <argument name="OPT_SHOW_COMMENTS" value="true"/>
-                <argument name="OPT_SHOW_CTE" value="true"/>
-                <argument name="OPT_SHOW_USERCODE" value="true"/>
-                <argument name="OPT_SHOW_TS_DETAILS" value="true"/>
-                <argument name="OPT_SHOW_REQUIREMENT_TEXT" value="false"/>
-                <argument name="OPT_SHOW_FAULT_INJECTION_TCS" value="true"/>
-                <argument name="OPT_SHOW_FAULT_INJECTIONS" value="true"/>
-                <argument name="OPT_HIDE_NONE_VALUES" value="true"/>
-                <argument name="OPT_SHOW_NOTES" value="true"/>
-                <argument name="OPT_SHOW_UUID" value="false"/>
-                <argument name="OPT_HIDE_TESTSTEPS" value="false"/>
-                <argument name="OPT_SHOW_VARIANT_INFO" value="true"/>
             </arguments>
         </operation>
     </operations>
