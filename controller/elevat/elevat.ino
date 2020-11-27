@@ -59,13 +59,14 @@
 #define PIN_O_CABIN_LIGHT 48     // port pin 24
 #define PIN_O_GREEN_STATUS 12    // Green Status LED
 #define PIN_O_RED_STATUS 13      // Red Status LED
+#define PIN_I_MANUAL_MODE 22
 
 // ------------------------------
 // Enum definitions
 // ------------------------------
 
 enum OperationState {
-  init_state, sleep_state, move_state, opendoors_state, wait_state, closedoors_state, maintenance_state, testc_state
+  init_state, sleep_state, move_state, opendoors_state, wait_state, closedoors_state, maintenance_state, testc_state, manual_state
 };
 
 enum PositionState {
@@ -350,6 +351,7 @@ void setup() {
   pinMode(PIN_I_LEVEL_0, INPUT);
   pinMode(PIN_I_LEVEL_1, INPUT);
   pinMode(PIN_I_LEVEL_2, INPUT);
+  pinMode(PIN_I_MANUAL_MODE, INPUT);
 
   // Setup arrays
   for (int i = 0; i < LEVEL_NUMBER; i++) {
@@ -400,9 +402,9 @@ void loop() {
   cycle_time = millis();
 
   if (state == testc_state && leave_testc_state == 0) {
-	  return;
+    return;
   }
-  
+
   transferInputs();
 
   setStatusLEDs();
@@ -431,6 +433,9 @@ void loop() {
       break;
     case testc_state:
       testc();
+      break;
+    case manual_state:
+      manualMode();
       break;
     default:
       setState(maintenance_state);
@@ -611,6 +616,7 @@ void transferInputs() {
   transferEncoderInput();
   transferLevelSensors();
   transferTemperature();
+  transferManualMode();
 }
 
 boolean readSafetySwitch(int pin) {
@@ -738,15 +744,15 @@ void maintenance() {
 void sleep() {
 
   if (state == testc_state) {
-	  return;
+    return;
   }
-  
+
   if (request_for_testc_state == 1) {
     request_for_testc_state = 0;
     setState(testc_state);
     return;
   }
-  
+
   for (int i = 0; i < LEVEL_NUMBER; i++) {
     if (button_state[i] && level_position_state[i] == reached) {
       setState(opendoors_state);
@@ -847,24 +853,24 @@ void receiveEvent(int howMany) {
   }
   if (nbr_of_received_bytes == I2C_BUFFER) {
     int address = received_values[0];
-    
+
     if (state != testc_state && request_for_testc_state == 0) {
       int request = arrayToInt(&received_values[1]);
       if (address == 0 && request == 1) {
         request_for_testc_state = 1;
       }
       return;
-      
+
     } else if (state != testc_state) {
       return;
-     
+
     } else if (address == 0) {
       int request = arrayToInt(&received_values[1]);
       if (request == 2) {
         leave_testc_state = 1;
       }
       return;
-    
+
     } else if (address == 1) {
       state = (OperationState) arrayToInt(&received_values[1]);
 
@@ -1109,4 +1115,53 @@ void requestEvent() {
   }
 }
 
+void transferManualMode() {
+  int manualPin = digitalRead(PIN_I_MANUAL_MODE);
+  if (manualPin == LOW && state != manual_state) {
+    setState(manual_state);
+    setCabinLight(off);
+  } 
+  if (manualPin == HIGH && state == manual_state) {
+    setState(init_state);
+    setCabinLight(on);
+  }
+}
 
+void manualMode() {
+  MotorSpeed manualSpeed = stopped;
+  MotorDirection manualDirection = up;
+
+  if (button_state[1]) {
+    manualSpeed = stopped;
+  } else if (button_state[0]) {
+    manualDirection = down;
+    manualSpeed = fast;
+  } else if (button_state[2]) {
+    manualDirection = up;
+    manualSpeed = fast;
+  }
+
+  if (manualSpeed == stopped) {
+    digitalWrite(PIN_O_MOTOR_ENABLE, LOW);
+    digitalWrite(PIN_O_MOTOR_UP, LOW);
+    digitalWrite(PIN_O_MOTOR_DOWN, LOW);
+  } else {
+    digitalWrite(PIN_O_MOTOR_ENABLE, HIGH);
+    if (manualDirection == up) {
+      analogWrite(PIN_O_MOTOR_UP, FAST_MOTOR_SPEED);
+      digitalWrite(PIN_O_MOTOR_DOWN, LOW);
+    } else {
+      analogWrite(PIN_O_MOTOR_DOWN, FAST_MOTOR_SPEED);
+      digitalWrite(PIN_O_MOTOR_UP, LOW);
+    }
+  }
+
+  if (manualSpeed == stopped) {
+    for (int i = 0; i < LEVEL_NUMBER; i++) {
+      button_state[i] = false;
+      setButtonLight(i, off);
+    }
+  }
+
+  delay(5);
+}
