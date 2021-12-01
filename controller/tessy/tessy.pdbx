@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-    backup="$(PROJECTROOT)\tessy\backup"
+    backup="$(PROJECTROOT)/tessy/backup"
     configuration=""
-    database="$(PROJECTROOT)\tessy"
+    database="$(PROJECTROOT)/tessy"
     defaultEnvironment=""
     description="Elevator demonstrator project"
     enableSourceRoot="false"
     identifier="94b3a8ad-5952-491b-bf24-8c6ec77bef31"
-    location="$(PROJECTROOT)\tessy"
+    location="$(PROJECTROOT)/tessy"
     name="Elevator"
-    projectVersion="4"
-    tessyVersion="4.0.15"
+    projectVersion="5"
+    tessyVersion="5.0.2"
     isTemplate="false"
     isSample="false"/>
