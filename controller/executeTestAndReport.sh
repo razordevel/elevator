@@ -30,7 +30,14 @@ tessycmd_checked -a exec-test "tessy/execution.tbs"
 
 tessycmd_checked -a exec-test "tessy/test_details_reports.tbs" 
 
-tessycmd_checked xslt $(pwd)/report/TESSY_OverviewReport.xml 
+RESULT_FILE=testresult_$(date --iso-8601=seconds)
+
+touch "$RESULT_FILE"
+ln -sf "$RESULT_FILE" last_result
+
+tessycmd_checked xslt $(pwd)/report/TESSY_OverviewReport.xml > last_result
+
+cat $RESULT_FILE
 
 tessycmd_checked disconnect
 

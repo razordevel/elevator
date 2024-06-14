@@ -1,0 +1,24 @@
+Batch execution result
+======================
+
+Total:		35
+Passed:		18
+Not executed:	11
+	readBlockedLevelSensor
+	readTemperature
+	setOutsideLevelStates
+	transferEncoderInput
+	transferInputs
+	readTemperature
+	setState
+	setup
+	testc
+	transferInputs
+	wait
+Failed:		6
+	moveDoors
+	setDoorPositions
+	findTargetLevel
+	readLevelButton
+	readLevelSensor
+	transferLevelSensors

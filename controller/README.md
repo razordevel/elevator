@@ -1,5 +1,11 @@
 # Controller
 
+## Purpose
+
+This TESSY project is intended to demonstrate several aspects of TESSY. For example, the code contains bugs that should be detected by TESSY.
+
+## Description
+
 The hardware of the controller is an Arduino Due. 
 
 To protect the input of the Arduino all +5V inputs have to be restricted to +3,3V to protect the Arduino. The Razorcat demonstrator uses a set of 220 kOhm and 100 kOhm resistors. The wiring of the resistors is documented here:
@@ -24,6 +30,15 @@ On Linux with Tessy installed
 ```
 ./executeTestAndReport.sh
 ```
+
+### Verification of Results
+
+The expected result is stored in `expected_result'. To verify your test run:
+
+```
+diff expected_result last_testresult
+```
+
 ## Running Headless Tests in docker
 
 Razorcat provides an official docker image [razorcat/tessy](https://hub.docker.com/r/razorcat/tessy). 
